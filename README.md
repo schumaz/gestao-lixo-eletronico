@@ -25,15 +25,15 @@ Projeto desenvolvido para a disciplina de **Processo de Desenvolvimento de Softw
 
 ---
 
-## Como Executar o Projeto
+## Como Executar o Projeto Localmente
 
 ### Pré-requisitos
 * **Java 17** ou superior instalado.
-* **PostgreSQL** instalado e em execução na máquina local (porta padrão `5432`).
 * Git configurado.
+* **PostgreSQL + pgAdmin:** É necessário ter o PostgreSQL instalado e rodando como serviço na máquina (porta padrão `5432`). Recomendamos instalar o pacote oficial que já inclui o **pgAdmin** (interface gráfica para gerenciar bancos de dados). Guarde a senha definida durante a instalação para o usuário `postgres`.
 
 ### 1. Criar o Banco de Dados
-Abra o **pgAdmin**, **DBeaver** ou o terminal `psql` e execute o comando:
+Abra o **pgAdmin**, conecte-se ao seu servidor local do PostgreSQL e crie a base de dados (ou execute o comando abaixo na Query Tool / `psql`):
 
 ```sql
 CREATE DATABASE lixo_eletronico_db;
