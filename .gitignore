@@ -44,5 +44,6 @@ ehthumbs.db
 
 ### Local environment and secrets ###
 .env
+.zed
 application-local.yaml
 application-local.properties
