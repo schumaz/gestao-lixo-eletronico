@@ -50,7 +50,7 @@ Por padrão, o projeto conecta usando:
 
 Se a sua senha ou usuário local do PostgreSQL forem diferentes, você pode:
 - **Opção A (Variáveis de Ambiente):** Definir as variáveis `DB_USER` e `DB_PASSWORD` no seu sistema ou na configuração de execução da IDE.
-- **Opção B (Arquivo Local - Recomendado):** Criar um arquivo `application-local.yaml` dentro de `src/main/resources/` (esse arquivo já está no `.gitignore` para não sobrescrever a configuração dos colegas):
+- **Opção B (Arquivo Local - Recomendado):** Criar um arquivo `application-local.yaml` dentro de `src/main/resources/` (esse arquivo já está no `.gitignore`):
 
 ```yaml
 spring:
