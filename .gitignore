@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs and temporary files ###
+*.log
+hs_err_pid*
+replay_pid*
+
+### OS files ###
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+### Local environment and secrets ###
+.env
+application-local.yaml
+application-local.properties
