@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
@@ -11,17 +12,16 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #bfdecf;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #bfd2de;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox alignment="CENTER" maxHeight="400.0" maxWidth="350.0" style="-fx-background-color: #93c2ac; -fx-border-radius: 8; -fx-border-width: 5; -fx-border-color: #618775;" StackPane.alignment="CENTER">
+      <VBox alignment="CENTER" maxHeight="450.0" maxWidth="400.0" style="-fx-background-color: #93b2c2; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 5; -fx-border-color: #617987;" StackPane.alignment="CENTER">
          <children>
-            <Label alignment="CENTER" prefHeight="54.0" prefWidth="339.0" text="Seja bem-vindo a Gestão de Lixo Eletrônico!" textAlignment="CENTER">
+            <Label alignment="CENTER" prefHeight="54.0" prefWidth="339.0" text="Acesso ao Sistema de Coleta de Lixo Eletrônico" textAlignment="CENTER">
                <font>
-                  <Font name="System Bold" size="14.0" />
+                  <Font name="Verdana Bold" size="12.0" />
                </font>
                <padding>
-                  <Insets left="20.0" right="20.0" />
+                  <Insets left="10.0" right="10.0" />
                </padding>
             </Label>
             <ImageView fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" style="-fx-effect: dropshadow(gaussian ,#30423a,0,0,5,5);">
@@ -33,8 +33,11 @@
                <padding>
                   <Insets top="20.0" />
                </padding>
+               <font>
+                  <Font name="Verdana" size="12.0" />
+               </font>
             </Label>
-            <TextField alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
+            <TextField alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" />
                </VBox.margin>
@@ -43,19 +46,25 @@
                <padding>
                   <Insets top="20.0" />
                </padding>
+               <font>
+                  <Font name="Verdana" size="12.0" />
+               </font>
             </Label>
-            <PasswordField alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
+            <PasswordField alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" />
                </VBox.margin>
             </PasswordField>
-            <Button alignment="CENTER" mnemonicParsing="false" style="-fx-background-color: #618775;" text="Entrar" textFill="WHITE">
+            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="62.0" style="-fx-background-color: #617987;" text="Entrar" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
                <VBox.margin>
                   <Insets bottom="20.0" top="20.0" />
                </VBox.margin>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </Button>
          </children>
       </VBox>
