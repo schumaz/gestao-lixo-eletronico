@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.exemplo.PerfilUsuarioController">
+
+    <!-- CONTAINER PRINCIPAL: HBox para colocar lado a lado -->
+    <HBox alignment="TOP_CENTER" spacing="20" style="-fx-background-color: bfd2de;">
+        <padding>
+            <Insets bottom="30" left="30" right="30" top="20" />
+        </padding>
+
+        <!-- COLUNA DA ESQUERDA: PERFIL E INFORMAÇÕES DA CONTA/DEPÓSITOS -->
+        <VBox minWidth="320" prefWidth="380" spacing="15">
+            
+            <!-- CARD 1: Informações da Conta -->
+            <VBox spacing="12" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #617987; -fx-border-radius: 10; -fx-padding: 20;">
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <ImageView fx:id="imgFotoPerfil" fitHeight="70" fitWidth="70" pickOnBounds="true" preserveRatio="true" style="-fx-border-radius: 8;">
+                  <image>
+                     <Image url="@images/profile-picture.png" />
+                  </image></ImageView>
+                    <VBox spacing="3">
+                        <Label fx:id="lblNome" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="João Silva" />
+                        <Label style="-fx-font-size: 12px; -fx-text-fill: #059669; -fx-font-weight: bold;" text="Descartador Consciente" />
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="6" style="-fx-padding: 10 0 0 0;">
+                    <Label style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #9ca3af;" text="INFORMAÇÕES DA CONTA" />
+                    <Label fx:id="lblEndereco" style="-fx-font-size: 13px; -fx-text-fill: #374151;" text="📍 Endereço: Av. João Naves de Ávila, 2121 - Uberlândia, MG" wrapText="true">
+                  <font>
+                     <Font name="Verdana" size="12.0" />
+                  </font></Label>
+                    <Label fx:id="lblEmail" style="-fx-font-size: 13px; -fx-text-fill: #374151;" text="✉ Email: joao.silva@email.com" />
+                    <Label fx:id="lblTelefone" style="-fx-font-size: 13px; -fx-text-fill: #374151;" text="📞 Telefone: (34) 99999-8888" />
+                </VBox>
+            </VBox>
+
+            <!-- CARD 2: Informações sobre Depósitos -->
+            <VBox spacing="12" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #617987; -fx-border-radius: 10; -fx-padding: 20;">
+                <Label style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #9ca3af;" text="ESTATÍSTICAS DE DEPÓSITO" />
+                
+                <VBox spacing="8">
+                    <VBox style="-fx-background-color: #f9fafb; -fx-padding: 10; -fx-background-radius: 6;">
+                        <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7280;" text="Último depósito feito" />
+                        <Label fx:id="lblUltimoDeposito" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1f2937;" text="12/10/2026 (EcoPonto Central)" />
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #f9fafb; -fx-padding: 10; -fx-background-radius: 6;">
+                        <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7280;" text="Material mais descartado" />
+                        <Label fx:id="lblMaterialMaisDescartado" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1f2937;" text="Placas Eletrônicas / Hardware" />
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #f0fdf4; -fx-padding: 10; -fx-background-radius: 6;">
+                        <Label style="-fx-font-size: 11px; -fx-text-fill: #166534;" text="Total descartado corretamente" />
+                        <Label fx:id="lblTotalKg" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #15803d;" text="18.5 kg" />
+                    </VBox>
+                </VBox>
+            </VBox>
+
+        </VBox>
+
+        <!-- COLUNA DA DIREITA: CONTAINER EXCLUSIVO DO HISTÓRICO -->
+        <VBox maxWidth="550" spacing="15" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #617987; -fx-border-radius: 10; -fx-padding: 20;" HBox.hgrow="ALWAYS">
+            
+            <HBox alignment="CENTER_LEFT">
+                <Label alignment="BASELINE_CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="223.0" style="-fx-font-weight: bold; -fx-text-fill: #111827; -fx-font-size: 15px;" text="Histórico de Descartes" textAlignment="CENTER">
+               <font>
+                  <Font name="Verdana" size="15.0" />
+               </font></Label>
+            </HBox>
+            
+            <!-- Lista dinâmica do Histórico -->
+            <VBox fx:id="containerHistorico" spacing="12" />
+        </VBox>
+
+    </HBox>
+</ScrollPane>
