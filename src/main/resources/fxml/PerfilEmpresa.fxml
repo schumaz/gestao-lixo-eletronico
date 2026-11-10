@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="760.0" prefWidth="1000.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <!-- HEADER / APENAS NOME DA EMPRESA -->
+      <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-border-color: #EAEAEA; -fx-border-width: 0 0 1 0; -fx-padding: 10 50 10 50;">
+         <children>
+            <!-- Nome da Empresa -->
+            <Label fx:id="lblNomeEmpresa" style="-fx-text-fill: #0B1B4F; -fx-font-size: 26px; -fx-font-weight: bold;" text="FXML" />
+         </children>
+      </HBox>
+
+      <!-- SEÇÃO PRINCIPAL (DIVIDIDA EM 2 COLUNAS: ESQUERDA E DIREITA) -->
+      <HBox alignment="TOP_LEFT" spacing="50.0" style="-fx-padding: 30 50 30 50;" VBox.vgrow="ALWAYS">
+         <children>
+            <!-- METADE ESQUERDA: IMAGEM SUPERIOR + SOBRE NÓS -->
+            <VBox alignment="TOP_LEFT" prefWidth="440.0" spacing="12.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <!-- Espaço de Imagem na Parte Superior Esquerda -->
+                  <ImageView fx:id="imgDestaqueEsquerda" fitHeight="160.0" fitWidth="430.0" pickOnBounds="true" preserveRatio="true" />
+                  
+                  <Region prefHeight="10.0" />
+                  
+                  <!-- SEÇÃO SOBRE NÓS (Posicionada mais abaixo) -->
+                  <Label fx:id="lblCategoria" style="-fx-text-fill: #2E7D32; -fx-font-weight: bold; -fx-font-size: 12px;" text="SOBRE NÓS" />
+                  
+                  <Label fx:id="lblTitulo" style="-fx-text-fill: #0B1B4F; -fx-font-size: 22px; -fx-font-weight: bold; -fx-line-spacing: 2px;" text="Transformar resíduo eletrônico em oportunidade" wrapText="true" />
+                  
+                  <!-- Tópico 1 -->
+                  <VBox spacing="4.0" style="-fx-padding: 4 0 0 0;">
+                     <children>
+                        <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 13px; -fx-font-weight: bold;" text="Quem somos" />
+                        <Label fx:id="lblQuemSomos" style="-fx-text-fill: #555555; -fx-font-size: 12px; -fx-line-spacing: 3px;" text="Somos uma empresa especializada no descarte correto de eletrônicos. Atuamos com a coleta, a triagem e o desmonte seguro de equipamentos em desuso." wrapText="true" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Tópico 2 -->
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 13px; -fx-font-weight: bold;" text="Por que reciclamos" />
+                        <Label fx:id="lblPorQueReciclamos" style="-fx-text-fill: #555555; -fx-font-size: 12px; -fx-line-spacing: 3px;" text="Trabalhamos para dar uma destinação ambientalmente correta aos resíduos, promovendo a reutilização de peças e componentes para reduzir o impacto ambiental." wrapText="true" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+
+            <!-- METADE DIREITA: DIVIDIDA EM CIMA (COMO DESCARTAMOS) E BAIXO (LOCALIZAÇÕES) -->
+            <VBox alignment="TOP_LEFT" prefWidth="440.0" spacing="25.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <!-- SESSÃO CIMA: COMO DESCARTAMOS -->
+                  <VBox alignment="TOP_LEFT" spacing="8.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="lblCategoriaDescarte" style="-fx-text-fill: #2E7D32; -fx-font-weight: bold; -fx-font-size: 12px;" text="COMO DESCARTAMOS" />
+                        
+                        <Label fx:id="lblTituloDescarte" style="-fx-text-fill: #0B1B4F; -fx-font-size: 20px; -fx-font-weight: bold;" text="Processo simples e seguro" wrapText="true" />
+                        
+                        <VBox spacing="4.0">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 13px; -fx-font-weight: bold;" text="1. Coleta e Triagem" />
+                              <Label fx:id="lblPasso1Descarte" style="-fx-text-fill: #555555; -fx-font-size: 12px; -fx-line-spacing: 2px;" text="Recebemos os materiais nos pontos autorizados e realizamos a separação criteriosa por categoria de resíduo." wrapText="true" />
+                           </children>
+                        </VBox>
+                        
+                        <VBox spacing="4.0">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 13px; -fx-font-weight: bold;" text="2. Desmonte e Destinação Eco-friendly" />
+                              <Label fx:id="lblPasso2Descarte" style="-fx-text-fill: #555555; -fx-font-size: 12px; -fx-line-spacing: 2px;" text="Desmontamos componentes para reciclagem e garantimos a destinação ambientalmente correta de peças." wrapText="true" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+
+                  <!-- SESSÃO BAIXO: LOCALIZAÇÕES -->
+                  <VBox alignment="TOP_LEFT" spacing="8.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="lblCategoriaLocalizacoes" style="-fx-text-fill: #2E7D32; -fx-font-weight: bold; -fx-font-size: 12px;" text="LOCALIZAÇÕES" />
+                        
+                        <Label fx:id="lblTituloLocalizacoes" style="-fx-text-fill: #0B1B4F; -fx-font-size: 20px; -fx-font-weight: bold;" text="Onde nos encontrar" wrapText="true" />
+                        
+                        <VBox spacing="4.0">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 13px; -fx-font-weight: bold;" text="Pontos de Coleta Ativos" />
+                              <Label fx:id="lblListaEnderecos" style="-fx-text-fill: #555555; -fx-font-size: 12px; -fx-line-spacing: 3px; -fx-cursor: hand;" text="• Av. João Naves de Ávila, 2200 - Santa Maria&#10;• Rua Ituiutaba, 470 - Nossa Senhora Aparecida" wrapText="true" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+
+      <!-- BARRA INFERIOR / RODAPÉ -->
+      <HBox alignment="TOP_LEFT" spacing="40.0" style="-fx-background-color: #080D30; -fx-padding: 30 50 30 50;">
+         <children>
+            <!-- COLUNA 1: Toneladas descartadas -->
+            <VBox alignment="TOP_LEFT" prefWidth="300.0" spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="lblStatToneladas" style="-fx-text-fill: #FFFFFF; -fx-font-size: 34px; -fx-font-weight: bold;" text="67 t" />
+                  <Label fx:id="lblStatToneladasDesc" style="-fx-text-fill: #64B5F6; -fx-font-size: 13px; -fx-font-weight: bold;" text="de resíduo eletrônico recebidas e destinadas" wrapText="true" />
+                  <Label fx:id="lblSloganEmpresa" style="-fx-text-fill: #90A4AE; -fx-font-size: 12px; -fx-line-spacing: 2px;" text="Coleta, descarte e reciclagem de resíduo eletrônico em Uberlândia há 10 anos." wrapText="true" />
+               </children>
+            </VBox>
+
+            <!-- COLUNA 2: Seção de CONTATO -->
+            <VBox alignment="TOP_LEFT" prefWidth="320.0" spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label style="-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 0 0 4 0;" text="CONTATO" />
+                  <Label fx:id="lblWhatsapp" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px; -fx-cursor: hand;" text="WhatsApp (34) 99672–3880" wrapText="true" /> 
+                  <Label fx:id="lblEmail" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px; -fx-cursor: hand;" text="contato@codelreciclagem.com.br" wrapText="true" />
+                  <Label fx:id="lblEndereco" style="-fx-text-fill: #90A4AE; -fx-font-size: 12px; -fx-line-spacing: 2px; -fx-cursor: hand;" text="Av. João Naves de Ávila, 2200 - Santa Maria, Uberlândia - MG, 38408-100" wrapText="true" />
+               </children>
+            </VBox>
+
+            <!-- COLUNA 3: Seção de HORÁRIO -->
+            <VBox alignment="TOP_LEFT" prefWidth="280.0" spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label style="-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 0 0 4 0;" text="HORÁRIO" />
+                  
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px;" text="Segunda a sexta" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblHorarioSemana" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px;" text="08:00 às 17:00" />
+                     </children>
+                  </HBox>
+                  
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px;" text="Sábado" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblHorarioSabado" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px;" text="08:00 às 12:00" />
+                     </children>
+                  </HBox>
+                  
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px;" text="Domingo" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblHorarioDomingo" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px;" text="Fechado" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
