@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.exemplo.PerfilUsuarioController">
+<ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.exemplo.PerfilUsuarioController">
 
     <!-- CONTAINER PRINCIPAL: HBox para colocar lado a lado -->
     <HBox alignment="TOP_CENTER" spacing="20" style="-fx-background-color: bfd2de;">
