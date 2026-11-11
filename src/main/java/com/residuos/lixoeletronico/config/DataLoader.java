@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.residuos.lixoeletronico.model.Contato;
 import com.residuos.lixoeletronico.model.Empresa;
@@ -25,86 +26,103 @@ public class DataLoader implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
-        // 1. Empresa Real: CODEL Reciclagem
-        if (!empresaRepository.existsByEmail("contato@codelreciclagem.com.br")) {
-            Empresa codel = new Empresa();
-            codel.setNome("CODEL Reciclagem");
-            codel.setEmail("contato@codelreciclagem.com.br");
-            codel.setSenha("codel123");
+        // 1. Empresa Real: CODEL Reciclagem (cria ou atualiza a senha caso já exista)
+        Empresa codel = empresaRepository.findByEmail("contato@codelreciclagem.com.br")
+                .orElseGet(Empresa::new);
 
-            codel.setQuemSomos("Somos uma empresa especializada no descarte correto de eletrônicos. " +
-                    "Atuamos com a coleta, a triagem e o desmonte seguro de equipamentos em desuso.");
+        codel.setNome("CODEL Reciclagem");
+        codel.setEmail("contato@codelreciclagem.com.br");
+        codel.setSenha("codel123"); // Garante a senha codel123 mesmo se já tiver sido criada antes
 
-            codel.setPorQueReciclamos("Trabalhamos para dar uma destinação ambientalmente correta aos resíduos, " +
-                    "promovendo a reutilização de peças e componentes para reduzir o impacto ambiental.");
+        codel.setQuemSomos("Somos uma empresa especializada no descarte correto de eletrônicos. " +
+                "Atuamos com a coleta, a triagem e o desmonte seguro de equipamentos em desuso.");
 
-            codel.setInstrucoesDescarte("Recebemos os materiais nos pontos autorizados e realizamos a separação criteriosa por categoria de resíduo.");
+        codel.setPorQueReciclamos("Trabalhamos para dar uma destinação ambientalmente correta aos resíduos, " +
+                "promovendo a reutilização de peças e componentes para reduzir o impacto ambiental.");
 
+        codel.setInstrucoesDescarte("Recebemos os materiais nos pontos autorizados e realizamos a separação criteriosa por categoria de resíduo.");
+
+        if (codel.getTotalKgDescartado() == null || codel.getTotalKgDescartado().compareTo(BigDecimal.ZERO) == 0) {
             codel.adicionarKg(new BigDecimal("67000.000")); // 67 toneladas
+        }
 
-            Contato contatoCodel = new Contato();
-            contatoCodel.setWhatsapp("(34) 99672-3880");
-            contatoCodel.setTelefone("(34) 3210-9900");
-            contatoCodel.setSite("https://codelreciclagem.com.br");
-            contatoCodel.setInstagram("@codelreciclagem");
-            codel.setContato(contatoCodel);
+        if (codel.getContato() == null) {
+            codel.setContato(new Contato());
+        }
+        codel.getContato().setWhatsapp("(34) 99672-3880");
+        codel.getContato().setTelefone("(34) 3210-9900");
+        codel.getContato().setSite("https://codelreciclagem.com.br");
+        codel.getContato().setInstagram("@codelreciclagem");
 
-            Endereco enderecoCodel = new Endereco();
-            enderecoCodel.setCep("38408-100");
-            enderecoCodel.setLogradouro("Av. João Naves de Ávila");
-            enderecoCodel.setNumero("2200");
-            enderecoCodel.setBairro("Santa Maria");
-            enderecoCodel.setCidade("Uberlândia");
-            enderecoCodel.setUf("MG");
-            codel.setEndereco(enderecoCodel);
+        if (codel.getEndereco() == null) {
+            codel.setEndereco(new Endereco());
+        }
+        codel.getEndereco().setCep("38408-100");
+        codel.getEndereco().setLogradouro("Av. João Naves de Ávila");
+        codel.getEndereco().setNumero("2200");
+        codel.getEndereco().setBairro("Santa Maria");
+        codel.getEndereco().setCidade("Uberlândia");
+        codel.getEndereco().setUf("MG");
 
+        if (codel.getHorarios().isEmpty()) {
             codel.getHorarios().add(new HorarioFuncionamento(DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(17, 0)));
             codel.getHorarios().add(new HorarioFuncionamento(DayOfWeek.FRIDAY, LocalTime.of(8, 0), LocalTime.of(17, 0)));
             codel.getHorarios().add(new HorarioFuncionamento(DayOfWeek.SATURDAY, LocalTime.of(8, 0), LocalTime.of(12, 0)));
+        }
 
+        if (codel.getMateriaisAceitos().isEmpty()) {
             codel.getMateriaisAceitos().addAll(Set.of(
                     CategoriaMaterial.INFORMATICA,
                     CategoriaMaterial.CELULARES_TABLETS,
                     CategoriaMaterial.PILHAS_BATERIAS,
                     CategoriaMaterial.CABOS_CARREGADORES
             ));
-
-            empresaRepository.save(codel);
         }
 
+        empresaRepository.save(codel);
+
         // 2. Empresa Fictícia de Teste: admin@admin / senha admin
-        if (!empresaRepository.existsByEmail("admin@admin.com")) {
-            Empresa admin = new Empresa();
-            admin.setNome("EcoPonto Reciclagem Fictícia");
-            admin.setEmail("admin@admin.com");
-            admin.setSenha("admin");
+        Empresa admin = empresaRepository.findByEmail("admin@admin.com")
+                .orElseGet(Empresa::new);
 
-            admin.setQuemSomos("Empresa modelo criada para demonstração e homologação do sistema de gestão de lixo eletrônico.");
-            admin.setPorQueReciclamos("Promover práticas sustentáveis de descarte ecológico com transparência e rastreabilidade total.");
-            admin.setInstrucoesDescarte("Separe os cabos e pilhas em recipientes isolados antes da entrega no ponto de coleta.");
+        admin.setNome("EcoPonto Reciclagem Fictícia");
+        admin.setEmail("admin@admin.com");
+        admin.setSenha("admin");
 
+        admin.setQuemSomos("Empresa modelo criada para demonstração e homologação do sistema de gestão de lixo eletrônico.");
+        admin.setPorQueReciclamos("Promover práticas sustentáveis de descarte ecológico com transparência e rastreabilidade total.");
+        admin.setInstrucoesDescarte("Separe os cabos e pilhas em recipientes isolados antes da entrega no ponto de coleta.");
+
+        if (admin.getTotalKgDescartado() == null || admin.getTotalKgDescartado().compareTo(BigDecimal.ZERO) == 0) {
             admin.adicionarKg(new BigDecimal("15500.000")); // 15.5 toneladas
+        }
 
-            Contato contatoAdmin = new Contato();
-            contatoAdmin.setWhatsapp("(34) 99999-0000");
-            contatoAdmin.setTelefone("(34) 3232-0000");
-            contatoAdmin.setSite("https://ecoponto-demo.eco.br");
-            contatoAdmin.setInstagram("@ecoponto.demo");
-            admin.setContato(contatoAdmin);
+        if (admin.getContato() == null) {
+            admin.setContato(new Contato());
+        }
+        admin.getContato().setWhatsapp("(34) 99999-0000");
+        admin.getContato().setTelefone("(34) 3232-0000");
+        admin.getContato().setSite("https://ecoponto-demo.eco.br");
+        admin.getContato().setInstagram("@ecoponto.demo");
 
-            Endereco enderecoAdmin = new Endereco();
-            enderecoAdmin.setCep("38400-000");
-            enderecoAdmin.setLogradouro("Rua da Sustentabilidade");
-            enderecoAdmin.setNumero("500");
-            enderecoAdmin.setBairro("Centro");
-            enderecoAdmin.setCidade("Uberlândia");
-            enderecoAdmin.setUf("MG");
-            admin.setEndereco(enderecoAdmin);
+        if (admin.getEndereco() == null) {
+            admin.setEndereco(new Endereco());
+        }
+        admin.getEndereco().setCep("38400-000");
+        admin.getEndereco().setLogradouro("Rua da Sustentabilidade");
+        admin.getEndereco().setNumero("500");
+        admin.getEndereco().setBairro("Centro");
+        admin.getEndereco().setCidade("Uberlândia");
+        admin.getEndereco().setUf("MG");
 
+        if (admin.getHorarios().isEmpty()) {
             admin.getHorarios().add(new HorarioFuncionamento(DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(18, 0)));
             admin.getHorarios().add(new HorarioFuncionamento(DayOfWeek.SATURDAY, LocalTime.of(9, 0), LocalTime.of(13, 0)));
+        }
 
+        if (admin.getMateriaisAceitos().isEmpty()) {
             admin.getMateriaisAceitos().addAll(Set.of(
                     CategoriaMaterial.INFORMATICA,
                     CategoriaMaterial.CELULARES_TABLETS,
@@ -112,8 +130,8 @@ public class DataLoader implements CommandLineRunner {
                     CategoriaMaterial.LAMPADAS,
                     CategoriaMaterial.CABOS_CARREGADORES
             ));
-
-            empresaRepository.save(admin);
         }
+
+        empresaRepository.save(admin);
     }
 }
