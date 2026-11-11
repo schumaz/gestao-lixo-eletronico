@@ -12,9 +12,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #bfd2de;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+           prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #bfd2de;" 
+           xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.residuos.lixoeletronico.controller.LoginController">
    <children>
-      <VBox alignment="CENTER" maxHeight="450.0" maxWidth="400.0" style="-fx-background-color: #93b2c2; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 5; -fx-border-color: #617987;" StackPane.alignment="CENTER">
+      <VBox alignment="CENTER" maxHeight="480.0" maxWidth="400.0" 
+            style="-fx-background-color: #93b2c2; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 5; -fx-border-color: #617987;" 
+            StackPane.alignment="CENTER">
          <children>
             <Label alignment="CENTER" prefHeight="54.0" prefWidth="339.0" text="Acesso ao Sistema de Coleta de Lixo Eletrônico" textAlignment="CENTER">
                <font>
@@ -29,38 +34,49 @@
                   <Image url="@images/logo.png" />
                </image>
             </ImageView>
-            <Label prefHeight="25.0" prefWidth="250.0" text="Usuário">
+            <Label prefHeight="25.0" prefWidth="250.0" text="Usuário (E-mail)">
                <padding>
-                  <Insets top="20.0" />
+                  <Insets top="15.0" />
                </padding>
                <font>
                   <Font name="Verdana" size="12.0" />
                </font>
             </Label>
-            <TextField alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
+            <TextField fx:id="txtUsuario" alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" />
                </VBox.margin>
             </TextField>
             <Label prefHeight="25.0" prefWidth="250.0" text="Senha">
                <padding>
-                  <Insets top="20.0" />
+                  <Insets top="15.0" />
                </padding>
                <font>
                   <Font name="Verdana" size="12.0" />
                </font>
             </Label>
-            <PasswordField alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
+            <PasswordField fx:id="txtSenha" alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0" style="-fx-border-color: #618775; -fx-background-radius: 8; -fx-border-radius: 8;">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" />
                </VBox.margin>
             </PasswordField>
-            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="62.0" style="-fx-background-color: #617987;" text="Entrar" textFill="WHITE">
+            
+            <!-- Label para mensagens de erro/sucesso -->
+            <Label fx:id="lblMensagem" alignment="CENTER" prefHeight="20.0" prefWidth="300.0" textFill="#9c0000">
+               <font>
+                  <Font name="Verdana Bold" size="11.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleLogin" prefHeight="26.0" prefWidth="80.0" style="-fx-background-color: #617987;" text="Entrar" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
                <VBox.margin>
-                  <Insets bottom="20.0" top="20.0" />
+                  <Insets bottom="20.0" top="10.0" />
                </VBox.margin>
                <cursor>
                   <Cursor fx:constant="HAND" />
