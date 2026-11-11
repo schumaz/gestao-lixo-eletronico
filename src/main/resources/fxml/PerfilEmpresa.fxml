@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="760.0" prefWidth="1000.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="760.0" prefWidth="1000.0" style="-fx-background-color: #FFFFFF;" 
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.residuos.lixoeletronico.controller.PerfilEmpresaController">
    <children>
-      <!-- HEADER / APENAS NOME DA EMPRESA -->
+      <!-- HEADER / NOME DA EMPRESA + BOTÃO SAIR -->
       <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-border-color: #EAEAEA; -fx-border-width: 0 0 1 0; -fx-padding: 10 50 10 50;">
          <children>
             <!-- Nome da Empresa -->
-            <Label fx:id="lblNomeEmpresa" style="-fx-text-fill: #0B1B4F; -fx-font-size: 26px; -fx-font-weight: bold;" text="FXML" />
+            <Label fx:id="lblNomeEmpresa" style="-fx-text-fill: #0B1B4F; -fx-font-size: 26px; -fx-font-weight: bold;" text="Empresa" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: #617987; -fx-text-fill: #FFFFFF; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold; -fx-padding: 6 15 6 15;" text="Sair" />
          </children>
       </HBox>
 
@@ -102,9 +107,9 @@
             <!-- COLUNA 1: Toneladas descartadas -->
             <VBox alignment="TOP_LEFT" prefWidth="300.0" spacing="8.0" HBox.hgrow="ALWAYS">
                <children>
-                  <Label fx:id="lblStatToneladas" style="-fx-text-fill: #FFFFFF; -fx-font-size: 34px; -fx-font-weight: bold;" text="67 t" />
+                  <Label fx:id="lblStatToneladas" style="-fx-text-fill: #FFFFFF; -fx-font-size: 34px; -fx-font-weight: bold;" text="0 kg" />
                   <Label fx:id="lblStatToneladasDesc" style="-fx-text-fill: #64B5F6; -fx-font-size: 13px; -fx-font-weight: bold;" text="de resíduo eletrônico recebidas e destinadas" wrapText="true" />
-                  <Label fx:id="lblSloganEmpresa" style="-fx-text-fill: #90A4AE; -fx-font-size: 12px; -fx-line-spacing: 2px;" text="Coleta, descarte e reciclagem de resíduo eletrônico em Uberlândia há 10 anos." wrapText="true" />
+                  <Label fx:id="lblSloganEmpresa" style="-fx-text-fill: #90A4AE; -fx-font-size: 12px; -fx-line-spacing: 2px;" text="Coleta, descarte e reciclagem de resíduo eletrônico." wrapText="true" />
                </children>
             </VBox>
 
@@ -112,9 +117,9 @@
             <VBox alignment="TOP_LEFT" prefWidth="320.0" spacing="8.0" HBox.hgrow="ALWAYS">
                <children>
                   <Label style="-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 0 0 4 0;" text="CONTATO" />
-                  <Label fx:id="lblWhatsapp" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px; -fx-cursor: hand;" text="WhatsApp (34) 99672–3880" wrapText="true" /> 
-                  <Label fx:id="lblEmail" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px; -fx-cursor: hand;" text="contato@codelreciclagem.com.br" wrapText="true" />
-                  <Label fx:id="lblEndereco" style="-fx-text-fill: #90A4AE; -fx-font-size: 12px; -fx-line-spacing: 2px; -fx-cursor: hand;" text="Av. João Naves de Ávila, 2200 - Santa Maria, Uberlândia - MG, 38408-100" wrapText="true" />
+                  <Label fx:id="lblWhatsapp" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px; -fx-cursor: hand;" text="WhatsApp -" wrapText="true" /> 
+                  <Label fx:id="lblEmail" style="-fx-text-fill: #E0E0E0; -fx-font-size: 13px; -fx-cursor: hand;" text="contato@empresa.com" wrapText="true" />
+                  <Label fx:id="lblEndereco" style="-fx-text-fill: #90A4AE; -fx-font-size: 12px; -fx-line-spacing: 2px; -fx-cursor: hand;" text="Endereço não cadastrado" wrapText="true" />
                </children>
             </VBox>
 

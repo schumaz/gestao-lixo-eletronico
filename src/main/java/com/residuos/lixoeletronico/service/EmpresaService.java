@@ -22,20 +22,40 @@ public class EmpresaService {
 
     @Transactional
     public EmpresaResponse criarEmpresa(EmpresaCreateRequest request) {
-        // Verifica se o e-mail já existe para evitar duplicidade
-        // (Requer adicionar o método boolean existsByEmail(String email) no EmpresaRepository)
-        
+        if (repository.existsByEmail(request.email())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado: " + request.email());
+        }
+
         Empresa novaEmpresa = EmpresaMapper.toEntity(request);
         Empresa empresaSalva = repository.save(novaEmpresa);
-        
+
         return EmpresaMapper.toResponse(empresaSalva);
     }
 
     @Transactional(readOnly = true)
     public EmpresaResponse buscarPerfilPorId(Long id) {
-        Empresa empresa = repository.findById(id)
+        Empresa empresa = repository.findPerfilById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empresa não encontrada com o ID: " + id));
-                
+
+        return EmpresaMapper.toResponse(empresa);
+    }
+
+    @Transactional(readOnly = true)
+    public EmpresaResponse autenticar(String email, String senha) {
+        String emailFormatado = email != null ? email.trim() : "";
+        String emailBusca = "admin@admin".equalsIgnoreCase(emailFormatado) ? "admin@admin.com" : emailFormatado;
+
+        Empresa empresa = repository.findPerfilById(
+                repository.findByEmail(emailBusca)
+                        .or(() -> repository.findByEmail(emailFormatado))
+                        .map(Empresa::getId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos."))
+        ).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos."));
+
+        if (!empresa.getSenha().equals(senha)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos.");
+        }
+
         return EmpresaMapper.toResponse(empresa);
     }
 }
