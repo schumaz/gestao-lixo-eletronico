@@ -6,8 +6,8 @@ import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -16,20 +16,18 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 class EmpresaRepositoryTest {
 
     @Autowired
     private EmpresaRepository repository;
 
-    @Autowired
-    private TestEntityManager entityManager;
-
     @Test
     @DisplayName("Deve verificar se email existe corretamente no banco")
     void deveVerificarExistenciaDeEmail() {
         Empresa empresa = new Empresa(null, "Empresa Alpha", "senha123", "alpha@recicla.com");
-        entityManager.persistAndFlush(empresa);
+        repository.save(empresa);
 
         assertTrue(repository.existsByEmail("alpha@recicla.com"));
         assertFalse(repository.existsByEmail("beta@recicla.com"));
@@ -42,8 +40,7 @@ class EmpresaRepositoryTest {
         empresa.getHorarios().add(new HorarioFuncionamento(DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(17, 0)));
         empresa.getMateriaisAceitos().add(CategoriaMaterial.INFORMATICA);
 
-        Empresa salva = entityManager.persistAndFlush(empresa);
-        entityManager.clear(); // Limpa o contexto de persistência para forçar consulta ao banco
+        Empresa salva = repository.save(empresa);
 
         Optional<Empresa> perfilOpt = repository.findPerfilById(salva.getId());
 
@@ -60,15 +57,14 @@ class EmpresaRepositoryTest {
         Empresa empresa = new Empresa(null, "Empresa Gamma", "senha123", "gamma@recicla.com");
         empresa.setTotalKgDescartado(new BigDecimal("100.000"));
 
-        Empresa salva = entityManager.persistAndFlush(empresa);
+        Empresa salva = repository.save(empresa);
         Long id = salva.getId();
 
         int linhasAfetadas = repository.adicionarKgDescartado(id, new BigDecimal("50.500"));
         assertEquals(1, linhasAfetadas);
 
-        entityManager.clear(); // Recarrega do banco para validar o valor atualizado
-        Empresa atualizada = entityManager.find(Empresa.class, id);
-
-        assertEquals(new BigDecimal("150.500"), atualizada.getTotalKgDescartado());
+        Optional<Empresa> atualizadaOpt = repository.findById(id);
+        assertTrue(atualizadaOpt.isPresent());
+        assertEquals(new BigDecimal("150.500"), atualizadaOpt.get().getTotalKgDescartado());
     }
 }

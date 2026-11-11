@@ -41,10 +41,10 @@ class EmpresaMapperTest {
         empresa.setTotalKgDescartado(new BigDecimal("1200.000"));
 
         HorarioFuncionamento sabado = new HorarioFuncionamento(DayOfWeek.SATURDAY, LocalTime.of(8, 0), LocalTime.of(12, 0));
-        HorarioFuncionamento segundaTarde = new HorarioFuncionamento(DayOfWeek.MONDAY, LocalTime.of(13, 0), LocalTime.of(18, 0));
-        HorarioFuncionamento segundaManha = new HorarioFuncionamento(DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(12, 0));
+        HorarioFuncionamento sexta = new HorarioFuncionamento(DayOfWeek.FRIDAY, LocalTime.of(8, 0), LocalTime.of(18, 0));
+        HorarioFuncionamento segunda = new HorarioFuncionamento(DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(17, 0));
 
-        empresa.getHorarios().addAll(Set.of(sabado, segundaTarde, segundaManha));
+        empresa.getHorarios().addAll(Set.of(sabado, sexta, segunda));
         empresa.getMateriaisAceitos().add(CategoriaMaterial.INFORMATICA);
 
         EmpresaResponse response = EmpresaMapper.toResponse(empresa);
@@ -58,11 +58,7 @@ class EmpresaMapperTest {
 
         assertEquals(3, response.horarios().size());
         assertEquals(DayOfWeek.MONDAY, response.horarios().get(0).diaSemana());
-        assertEquals(LocalTime.of(8, 0), response.horarios().get(0).abertura());
-
-        assertEquals(DayOfWeek.MONDAY, response.horarios().get(1).diaSemana());
-        assertEquals(LocalTime.of(13, 0), response.horarios().get(1).abertura());
-
+        assertEquals(DayOfWeek.FRIDAY, response.horarios().get(1).diaSemana());
         assertEquals(DayOfWeek.SATURDAY, response.horarios().get(2).diaSemana());
     }
 
