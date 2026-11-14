@@ -2,7 +2,9 @@ package com.residuos.lixoeletronico.config;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.CommandLineRunner;
@@ -13,16 +15,22 @@ import com.residuos.lixoeletronico.model.Contato;
 import com.residuos.lixoeletronico.model.Empresa;
 import com.residuos.lixoeletronico.model.Endereco;
 import com.residuos.lixoeletronico.model.HorarioFuncionamento;
+import com.residuos.lixoeletronico.model.LoteResiduo;
 import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
+import com.residuos.lixoeletronico.model.enums.StatusLote;
+import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
 import com.residuos.lixoeletronico.repository.EmpresaRepository;
+import com.residuos.lixoeletronico.repository.LoteResiduoRepository;
 
 @Component
 public class DataLoader implements CommandLineRunner {
 
     private final EmpresaRepository empresaRepository;
+    private final LoteResiduoRepository loteResiduoRepository;
 
-    public DataLoader(EmpresaRepository empresaRepository) {
+    public DataLoader(EmpresaRepository empresaRepository, LoteResiduoRepository loteResiduoRepository) {
         this.empresaRepository = empresaRepository;
+        this.loteResiduoRepository = loteResiduoRepository;
     }
 
     @Override
@@ -81,7 +89,7 @@ public class DataLoader implements CommandLineRunner {
             ));
         }
 
-        empresaRepository.save(codel);
+        Empresa codelSalva = empresaRepository.save(codel);
 
         // 2. Empresa Fictícia de Teste: admin@admin / senha admin
         Empresa admin = empresaRepository.findByEmail("admin@admin.com")
@@ -132,6 +140,56 @@ public class DataLoader implements CommandLineRunner {
             ));
         }
 
-        empresaRepository.save(admin);
+        Empresa adminSalva = empresaRepository.save(admin);
+
+        // 3. Seed inicial de Lotes de Resíduos para consulta em estoque
+        if (loteResiduoRepository.count() == 0) {
+            LoteResiduo lote1 = new LoteResiduo(
+                    codelSalva,
+                    "Mariana Oliveira",
+                    "(34) 99123-4567",
+                    LocalDate.now().minusDays(2),
+                    CategoriaMaterial.INFORMATICA,
+                    "Notebooks corporativos e placas-mãe",
+                    new BigDecimal("42.500"),
+                    UrgenciaDescarte.MEDIA
+            );
+
+            LoteResiduo lote2 = new LoteResiduo(
+                    codelSalva,
+                    "Carlos Eduardo Lima",
+                    "carlos.lima@email.com",
+                    LocalDate.now().minusDays(1),
+                    CategoriaMaterial.PILHAS_BATERIAS,
+                    "Baterias de íon-lítio inchadas",
+                    new BigDecimal("18.250"),
+                    UrgenciaDescarte.CRITICA
+            );
+
+            LoteResiduo lote3 = new LoteResiduo(
+                    codelSalva,
+                    "Fernanda Souza",
+                    "(34) 99876-5432",
+                    LocalDate.now().minusDays(10),
+                    CategoriaMaterial.CABOS_CARREGADORES,
+                    "Fontes ATX e cabos de rede",
+                    new BigDecimal("12.000"),
+                    UrgenciaDescarte.BAIXA
+            );
+            lote3.setStatus(StatusLote.DESTINADO);
+
+            LoteResiduo lote4 = new LoteResiduo(
+                    adminSalva,
+                    "João Pedro Mendes",
+                    "(34) 99777-8899",
+                    LocalDate.now(),
+                    CategoriaMaterial.CELULARES_TABLETS,
+                    "Smartphones e tablets com tela trincada",
+                    new BigDecimal("9.800"),
+                    UrgenciaDescarte.ALTA
+            );
+
+            loteResiduoRepository.saveAll(List.of(lote1, lote2, lote3, lote4));
+        }
     }
 }
