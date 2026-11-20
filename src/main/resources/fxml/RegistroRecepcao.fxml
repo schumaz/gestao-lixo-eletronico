@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="760.0" prefWidth="1000.0" style="-fx-background-color: #FFFFFF;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.residuos.lixoeletronico.controller.RegistroRecepcaoController">
+   <children>
+      <!-- HEADER -->
+      <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="12.0"
+            style="-fx-border-color: #EAEAEA; -fx-border-width: 0 0 1 0; -fx-padding: 10 50 10 50;">
+         <children>
+            <VBox alignment="CENTER_LEFT" spacing="2.0">
+               <children>
+                  <Label fx:id="lblTituloTela"
+                         style="-fx-text-fill: #0B1B4F; -fx-font-size: 22px; -fx-font-weight: bold;"
+                         text="Registro de Recepção de Resíduos" />
+                  <Label fx:id="lblNomeEmpresaHeader"
+                         style="-fx-text-fill: #2E7D32; -fx-font-size: 12px; -fx-font-weight: bold;"
+                         text="Empresa autenticada" />
+               </children>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnVoltarPerfil" mnemonicParsing="false" onAction="#handleVoltarPerfil"
+                    style="-fx-background-color: #617987; -fx-text-fill: #FFFFFF; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold; -fx-padding: 8 16 8 16;"
+                    text="Voltar ao Perfil" />
+         </children>
+      </HBox>
+
+      <!-- CONTEÚDO PRINCIPAL: FORMULÁRIO À ESQUERDA + INVENTÁRIO/BALANÇO À DIREITA -->
+      <HBox alignment="TOP_LEFT" spacing="35.0" style="-fx-padding: 25 50 25 50;" VBox.vgrow="ALWAYS">
+         <children>
+            <!-- FORMULÁRIO DE RECEPÇÃO -->
+            <VBox prefWidth="440.0" spacing="12.0"
+                  style="-fx-background-color: #F9FAFB; -fx-border-color: #E0E4E8; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;"
+                  HBox.hgrow="ALWAYS">
+               <children>
+                  <Label style="-fx-text-fill: #2E7D32; -fx-font-weight: bold; -fx-font-size: 11px;"
+                         text="ENTRADA DE LOTE" />
+                  <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 18px; -fx-font-weight: bold;"
+                         text="Dados da Recepção" />
+
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                               text="Nome do usuário / entregador *" />
+                        <TextField fx:id="txtNomeUsuario" promptText="Ex.: Mariana Oliveira"
+                                   style="-fx-background-radius: 6; -fx-border-color: #CFD8DC; -fx-border-radius: 6; -fx-padding: 7;" />
+                     </children>
+                  </VBox>
+
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                               text="Contato do usuário *" />
+                        <TextField fx:id="txtContatoUsuario" promptText="Ex.: (34) 99123-4567 ou e-mail"
+                                   style="-fx-background-radius: 6; -fx-border-color: #CFD8DC; -fx-border-radius: 6; -fx-padding: 7;" />
+                     </children>
+                  </VBox>
+
+                  <HBox spacing="12.0">
+                     <children>
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                                     text="Data de recepção *" />
+                              <DatePicker fx:id="dpDataRecepcao" maxWidth="1.7976931348623157E308" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                                     text="Peso (kg) *" />
+                              <TextField fx:id="txtPesoKg" promptText="Ex.: 12.500"
+                                         style="-fx-background-radius: 6; -fx-border-color: #CFD8DC; -fx-border-radius: 6; -fx-padding: 7;" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <HBox spacing="12.0">
+                     <children>
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                                     text="Categoria do material *" />
+                              <ComboBox fx:id="cbCategoriaMaterial" maxWidth="1.7976931348623157E308"
+                                        promptText="Selecione a categoria" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                                     text="Urgência de descarte *" />
+                              <ComboBox fx:id="cbUrgenciaDescarte" maxWidth="1.7976931348623157E308"
+                                        promptText="Selecione a urgência" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <VBox spacing="4.0">
+                     <children>
+                        <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                               text="Tipo / descrição do resíduo *" />
+                        <TextField fx:id="txtTipoResiduo" promptText="Ex.: Notebooks corporativos e placas-mãe"
+                                   style="-fx-background-radius: 6; -fx-border-color: #CFD8DC; -fx-border-radius: 6; -fx-padding: 7;" />
+                     </children>
+                  </VBox>
+
+                  <Label fx:id="lblMensagem" minHeight="32.0"
+                         style="-fx-font-size: 12px; -fx-font-weight: bold;" wrapText="true" />
+
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                     <children>
+                        <Button fx:id="btnLimpar" mnemonicParsing="false" onAction="#handleLimpar"
+                                style="-fx-background-color: #ECEFF1; -fx-text-fill: #37474F; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold; -fx-padding: 9 16 9 16;"
+                                text="Limpar" />
+                        <Button fx:id="btnRegistrar" mnemonicParsing="false" onAction="#handleRegistrarRecepcao"
+                                style="-fx-background-color: #2E7D32; -fx-text-fill: #FFFFFF; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold; -fx-padding: 9 18 9 18;"
+                                text="Registrar Recepção" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <!-- PAINEL DE INVENTÁRIO E BALANÇO DE MASSA -->
+            <VBox prefWidth="440.0" spacing="14.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <HBox spacing="14.0">
+                     <children>
+                        <VBox spacing="4.0"
+                              style="-fx-background-color: #080D30; -fx-background-radius: 8; -fx-padding: 16;"
+                              HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label style="-fx-text-fill: #64B5F6; -fx-font-size: 11px; -fx-font-weight: bold;"
+                                     text="MASSA TOTAL ACUMULADA" />
+                              <Label fx:id="lblMassaTotalEmpresa"
+                                     style="-fx-text-fill: #FFFFFF; -fx-font-size: 24px; -fx-font-weight: bold;"
+                                     text="0 kg" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="4.0"
+                              style="-fx-background-color: #E8F5E9; -fx-border-color: #C8E6C9; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 16;"
+                              HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label style="-fx-text-fill: #2E7D32; -fx-font-size: 11px; -fx-font-weight: bold;"
+                                     text="EM ESTOQUE ATUAL" />
+                              <Label fx:id="lblMassaEmEstoque"
+                                     style="-fx-text-fill: #1B5E20; -fx-font-size: 24px; -fx-font-weight: bold;"
+                                     text="0 kg" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 16px; -fx-font-weight: bold;"
+                         text="Lotes em Estoque (Inventário)" />
+
+                  <TableView fx:id="tblLotesEstoque" VBox.vgrow="ALWAYS">
+                     <columns>
+                        <TableColumn fx:id="colData" prefWidth="90.0" text="Data" />
+                        <TableColumn fx:id="colMaterial" prefWidth="125.0" text="Material" />
+                        <TableColumn fx:id="colTipo" prefWidth="135.0" text="Resíduo" />
+                        <TableColumn fx:id="colPeso" prefWidth="75.0" text="Peso (kg)" />
+                        <TableColumn fx:id="colUrgencia" prefWidth="80.0" text="Urgência" />
+                     </columns>
+                     <placeholder>
+                        <Label style="-fx-text-fill: #78909C;" text="Nenhum lote em estoque no momento." />
+                     </placeholder>
+                  </TableView>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>

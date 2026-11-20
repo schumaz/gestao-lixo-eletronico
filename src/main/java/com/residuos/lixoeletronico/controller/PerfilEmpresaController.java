@@ -1,5 +1,10 @@
 package com.residuos.lixoeletronico.controller;
 
+import com.residuos.lixoeletronico.config.UserSession;
+import com.residuos.lixoeletronico.dto.empresa.ContatoDTO;
+import com.residuos.lixoeletronico.dto.empresa.EmpresaResponse;
+import com.residuos.lixoeletronico.dto.empresa.EnderecoDTO;
+import com.residuos.lixoeletronico.dto.empresa.HorarioFuncionamentoDTO;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -8,16 +13,6 @@ import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-
-import com.residuos.lixoeletronico.config.UserSession;
-import com.residuos.lixoeletronico.dto.empresa.ContatoDTO;
-import com.residuos.lixoeletronico.dto.empresa.EmpresaResponse;
-import com.residuos.lixoeletronico.dto.empresa.EnderecoDTO;
-import com.residuos.lixoeletronico.dto.empresa.HorarioFuncionamentoDTO;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -25,6 +20,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PerfilEmpresaController implements Initializable {
@@ -77,7 +74,10 @@ public class PerfilEmpresaController implements Initializable {
     private final UserSession userSession;
     private final ApplicationContext applicationContext;
 
-    public PerfilEmpresaController(UserSession userSession, ApplicationContext applicationContext) {
+    public PerfilEmpresaController(
+        UserSession userSession,
+        ApplicationContext applicationContext
+    ) {
         this.userSession = userSession;
         this.applicationContext = applicationContext;
     }
@@ -95,15 +95,27 @@ public class PerfilEmpresaController implements Initializable {
             lblNomeEmpresa.setText(empresa.nome());
         }
 
-        if (lblQuemSomos != null && empresa.quemSomos() != null && !empresa.quemSomos().isBlank()) {
+        if (
+            lblQuemSomos != null &&
+            empresa.quemSomos() != null &&
+            !empresa.quemSomos().isBlank()
+        ) {
             lblQuemSomos.setText(empresa.quemSomos());
         }
 
-        if (lblPorQueReciclamos != null && empresa.porQueReciclamos() != null && !empresa.porQueReciclamos().isBlank()) {
+        if (
+            lblPorQueReciclamos != null &&
+            empresa.porQueReciclamos() != null &&
+            !empresa.porQueReciclamos().isBlank()
+        ) {
             lblPorQueReciclamos.setText(empresa.porQueReciclamos());
         }
 
-        if (lblPasso1Descarte != null && empresa.instrucoesDescarte() != null && !empresa.instrucoesDescarte().isBlank()) {
+        if (
+            lblPasso1Descarte != null &&
+            empresa.instrucoesDescarte() != null &&
+            !empresa.instrucoesDescarte().isBlank()
+        ) {
             lblPasso1Descarte.setText(empresa.instrucoesDescarte());
         }
 
@@ -113,9 +125,17 @@ public class PerfilEmpresaController implements Initializable {
 
         ContatoDTO contato = empresa.contato();
         if (contato != null) {
-            if (lblWhatsapp != null && contato.whatsapp() != null && !contato.whatsapp().isBlank()) {
+            if (
+                lblWhatsapp != null &&
+                contato.whatsapp() != null &&
+                !contato.whatsapp().isBlank()
+            ) {
                 lblWhatsapp.setText("WhatsApp: " + contato.whatsapp());
-            } else if (lblWhatsapp != null && contato.telefone() != null && !contato.telefone().isBlank()) {
+            } else if (
+                lblWhatsapp != null &&
+                contato.telefone() != null &&
+                !contato.telefone().isBlank()
+            ) {
                 lblWhatsapp.setText("Telefone: " + contato.telefone());
             }
         }
@@ -124,16 +144,24 @@ public class PerfilEmpresaController implements Initializable {
         if (endereco != null) {
             StringBuilder sb = new StringBuilder();
             if (endereco.logradouro() != null) sb.append(endereco.logradouro());
-            if (endereco.numero() != null) sb.append(", ").append(endereco.numero());
-            if (endereco.bairro() != null) sb.append(" - ").append(endereco.bairro());
-            if (endereco.cidade() != null) sb.append(", ").append(endereco.cidade());
+            if (endereco.numero() != null) sb.append(", ").append(
+                endereco.numero()
+            );
+            if (endereco.bairro() != null) sb.append(" - ").append(
+                endereco.bairro()
+            );
+            if (endereco.cidade() != null) sb.append(", ").append(
+                endereco.cidade()
+            );
             if (endereco.uf() != null) sb.append(" - ").append(endereco.uf());
             if (endereco.cep() != null) sb.append(", ").append(endereco.cep());
 
             String endFormatado = sb.toString();
             if (!endFormatado.isBlank()) {
                 if (lblEndereco != null) lblEndereco.setText(endFormatado);
-                if (lblListaEnderecos != null) lblListaEnderecos.setText("• " + endFormatado);
+                if (lblListaEnderecos != null) lblListaEnderecos.setText(
+                    "• " + endFormatado
+                );
             }
         }
 
@@ -147,21 +175,35 @@ public class PerfilEmpresaController implements Initializable {
         if (totalKg == null || totalKg.compareTo(BigDecimal.ZERO) == 0) {
             lblStatToneladas.setText("0 kg");
             if (lblStatToneladasDesc != null) {
-                lblStatToneladasDesc.setText("de resíduo eletrônico destinados corretamente");
+                lblStatToneladasDesc.setText(
+                    "de resíduo eletrônico destinados corretamente"
+                );
             }
             return;
         }
 
         if (totalKg.compareTo(new BigDecimal("1000")) >= 0) {
-            BigDecimal toneladas = totalKg.divide(new BigDecimal("1000"), 1, RoundingMode.HALF_UP);
-            lblStatToneladas.setText(toneladas.stripTrailingZeros().toPlainString() + " t");
+            BigDecimal toneladas = totalKg.divide(
+                new BigDecimal("1000"),
+                1,
+                RoundingMode.HALF_UP
+            );
+            lblStatToneladas.setText(
+                toneladas.stripTrailingZeros().toPlainString() + " t"
+            );
             if (lblStatToneladasDesc != null) {
-                lblStatToneladasDesc.setText("de resíduo eletrônico recebidas e destinadas");
+                lblStatToneladasDesc.setText(
+                    "de resíduo eletrônico recebidas e destinadas"
+                );
             }
         } else {
-            lblStatToneladas.setText(totalKg.stripTrailingZeros().toPlainString() + " kg");
+            lblStatToneladas.setText(
+                totalKg.stripTrailingZeros().toPlainString() + " kg"
+            );
             if (lblStatToneladasDesc != null) {
-                lblStatToneladasDesc.setText("de resíduo eletrônico destinados corretamente");
+                lblStatToneladasDesc.setText(
+                    "de resíduo eletrônico destinados corretamente"
+                );
             }
         }
     }
@@ -174,15 +216,44 @@ public class PerfilEmpresaController implements Initializable {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
         for (HorarioFuncionamentoDTO h : horarios) {
-            String intervalo = h.abertura().format(dtf) + " às " + h.fechamento().format(dtf);
+            String intervalo =
+                h.abertura().format(dtf) + " às " + h.fechamento().format(dtf);
 
-            if (h.diaSemana() == DayOfWeek.SATURDAY && lblHorarioSabado != null) {
+            if (
+                h.diaSemana() == DayOfWeek.SATURDAY && lblHorarioSabado != null
+            ) {
                 lblHorarioSabado.setText(intervalo);
-            } else if (h.diaSemana() == DayOfWeek.SUNDAY && lblHorarioDomingo != null) {
+            } else if (
+                h.diaSemana() == DayOfWeek.SUNDAY && lblHorarioDomingo != null
+            ) {
                 lblHorarioDomingo.setText(intervalo);
-            } else if (lblHorarioSemana != null && (h.diaSemana() == DayOfWeek.MONDAY || h.diaSemana() == DayOfWeek.FRIDAY)) {
+            } else if (
+                lblHorarioSemana != null &&
+                (h.diaSemana() == DayOfWeek.MONDAY ||
+                    h.diaSemana() == DayOfWeek.FRIDAY)
+            ) {
                 lblHorarioSemana.setText(intervalo);
             }
+        }
+    }
+
+    @FXML
+    public void handleAbrirRegistroRecepcao() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/RegistroRecepcao.fxml")
+            );
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+
+            Stage stage = (Stage) lblNomeEmpresa.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle(
+                "Registro de Recepção de Resíduos - Gestão de Lixo Eletrônico"
+            );
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -190,7 +261,9 @@ public class PerfilEmpresaController implements Initializable {
     public void handleLogout() {
         userSession.logout();
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/login.fxml")
+            );
             loader.setControllerFactory(applicationContext::getBean);
             Parent root = loader.load();
 
