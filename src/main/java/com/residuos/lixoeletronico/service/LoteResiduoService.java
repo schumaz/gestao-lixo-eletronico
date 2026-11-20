@@ -1,5 +1,18 @@
 package com.residuos.lixoeletronico.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.residuos.lixoeletronico.controller.PerfilUsuarioController.ItemHistoricoDTO;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoCreateRequest;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoMapper;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoResponse;
@@ -10,15 +23,8 @@ import com.residuos.lixoeletronico.model.enums.StatusLote;
 import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
 import com.residuos.lixoeletronico.repository.EmpresaRepository;
 import com.residuos.lixoeletronico.repository.LoteResiduoRepository;
+
 import jakarta.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class LoteResiduoService {
@@ -106,5 +112,53 @@ public class LoteResiduoService {
             .stream()
             .map(LoteResiduoMapper::toResponse)
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemHistoricoDTO> listarHistoricoPorUsuario(Long usuarioId) {
+        Specification<LoteResiduo> spec = (root, query, cb) ->
+            cb.equal(root.get("usuario").get("id"), usuarioId);
+
+        Sort sort = Sort.by(
+            Sort.Order.desc("dataRecepcao"),
+            Sort.Order.desc("id")
+        );
+
+        return loteResiduoRepository
+            .findAll(spec, sort)
+            .stream()
+            .map(lote ->
+                new ItemHistoricoDTO(
+                    lote.getCategoriaMaterial() != null
+                        ? lote.getCategoriaMaterial().name()
+                        : "Não especificado",
+                    lote.getPesoKg() != null ? lote.getPesoKg().doubleValue() : 0.0,
+                    lote.getEmpresa() != null
+                        ? lote.getEmpresa().getNome()
+                        : "Empresa não informada",
+                    lote.getDataRecepcao()
+                )
+            )
+            .toList();
+    }
+
+    public double calcularTotalKg(List<ItemHistoricoDTO> historico) {
+        return historico.stream().mapToDouble(ItemHistoricoDTO::pesoKg).sum();
+    }
+
+    public String obterMaterialMaisDescartado(List<ItemHistoricoDTO> historico) {
+        return historico
+            .stream()
+            .collect(
+                Collectors.groupingBy(
+                    ItemHistoricoDTO::material,
+                    Collectors.summingDouble(ItemHistoricoDTO::pesoKg)
+                )
+            )
+            .entrySet()
+            .stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("-");
     }
 }

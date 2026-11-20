@@ -1,8 +1,17 @@
 package com.residuos.lixoeletronico.model;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Objects;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
 import com.residuos.lixoeletronico.model.enums.StatusLote;
 import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,13 +26,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Table(name = "tb_lote_residuo")
@@ -39,6 +41,10 @@ public class LoteResiduo {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     @Column(name = "nome_usuario", nullable = false, length = 150)
     private String nomeUsuario;
