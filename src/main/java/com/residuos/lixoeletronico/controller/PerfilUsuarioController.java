@@ -1,9 +1,17 @@
 package com.residuos.lixoeletronico.controller;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+
+import org.springframework.stereotype.Component;
+
+import com.residuos.lixoeletronico.dto.usuario.ItemHistoricoDTO;
 import com.residuos.lixoeletronico.model.Endereco;
 import com.residuos.lixoeletronico.model.Usuario;
 import com.residuos.lixoeletronico.service.LoteResiduoService;
 import com.residuos.lixoeletronico.service.UsuarioService;
+
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -13,12 +21,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
 
 @Component
 public class PerfilUsuarioController {
@@ -188,11 +190,4 @@ public class PerfilUsuarioController {
         card.getChildren().addAll(topo, rodape);
         return card;
     }
-
-    public record ItemHistoricoDTO(
-            String material,
-            double pesoKg,
-            String nomeEmpresaDestino,
-            LocalDate dataDescarte
-    ) {}
 }

@@ -1,16 +1,15 @@
 package com.residuos.lixoeletronico.dto.lote;
 
-import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
-import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
+import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 public record LoteResiduoCreateRequest(
     @NotBlank(message = "Nome do usuário é obrigatório")
@@ -22,21 +21,42 @@ public record LoteResiduoCreateRequest(
     String contatoUsuario,
 
     @NotNull(message = "Data de recepção é obrigatória")
-    @PastOrPresent(message = "Data de recepção não pode ser futura")
     LocalDate dataRecepcao,
 
-    @NotNull(message = "Material é obrigatório")
+    @NotNull(message = "Categoria do material é obrigatória")
     CategoriaMaterial categoriaMaterial,
 
-    @NotBlank(message = "Tipo do resíduo é obrigatório")
-    @Size(max = 150, message = "Tipo do resíduo deve ter no máximo 150 caracteres")
+    @NotBlank(message = "Tipo de resíduo é obrigatório")
+    @Size(max = 150, message = "Tipo de resíduo deve ter no máximo 150 caracteres")
     String tipoResiduo,
 
     @NotNull(message = "Peso em kg é obrigatório")
-    @DecimalMin(value = "0.001", message = "Peso deve ser maior que zero")
-    @Digits(integer = 9, fraction = 3, message = "Peso deve ter no máximo 9 dígitos inteiros e 3 decimais")
+    @Positive(message = "Peso em kg deve ser maior que zero")
     BigDecimal pesoKg,
 
     @NotNull(message = "Urgência de descarte é obrigatória")
-    UrgenciaDescarte urgenciaDescarte
-) {}
+    UrgenciaDescarte urgenciaDescarte,
+
+    Long usuarioId
+) {
+    public LoteResiduoCreateRequest(
+        String nomeUsuario,
+        String contatoUsuario,
+        LocalDate dataRecepcao,
+        CategoriaMaterial categoriaMaterial,
+        String tipoResiduo,
+        BigDecimal pesoKg,
+        UrgenciaDescarte urgenciaDescarte
+    ) {
+        this(
+            nomeUsuario,
+            contatoUsuario,
+            dataRecepcao,
+            categoriaMaterial,
+            tipoResiduo,
+            pesoKg,
+            urgenciaDescarte,
+            null
+        );
+    }
+}

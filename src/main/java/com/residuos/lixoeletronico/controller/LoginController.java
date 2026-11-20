@@ -4,10 +4,13 @@ import java.io.IOException;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.residuos.lixoeletronico.config.UserSession;
 import com.residuos.lixoeletronico.dto.empresa.EmpresaResponse;
+import com.residuos.lixoeletronico.dto.usuario.UsuarioResponse;
 import com.residuos.lixoeletronico.service.EmpresaService;
+import com.residuos.lixoeletronico.service.UsuarioService;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,21 +34,28 @@ public class LoginController {
     private Label lblMensagem;
 
     private final EmpresaService empresaService;
+    private final UsuarioService usuarioService;
     private final UserSession userSession;
     private final ApplicationContext applicationContext;
 
-    public LoginController(EmpresaService empresaService, UserSession userSession, ApplicationContext applicationContext) {
+    public LoginController(
+            EmpresaService empresaService, 
+            UsuarioService usuarioService, 
+            UserSession userSession, 
+            ApplicationContext applicationContext
+    ) {
         this.empresaService = empresaService;
+        this.usuarioService = usuarioService;
         this.userSession = userSession;
         this.applicationContext = applicationContext;
     }
 
     @FXML
     public void handleLogin() {
-        String usuario = txtUsuario.getText().trim();
-        String senha = txtSenha.getText().trim();
+        String email = txtUsuario.getText() != null ? txtUsuario.getText().trim() : "";
+        String senha = txtSenha.getText() != null ? txtSenha.getText().trim() : "";
 
-        if (usuario.isEmpty() || senha.isEmpty()) {
+        if (email.isEmpty() || senha.isEmpty()) {
             lblMensagem.setStyle("-fx-text-fill: #9c0000;");
             lblMensagem.setText("Preencha todos os campos!");
             return;
@@ -55,18 +65,42 @@ public class LoginController {
             lblMensagem.setStyle("-fx-text-fill: #006600;");
             lblMensagem.setText("Autenticando...");
 
-            EmpresaResponse empresa = empresaService.autenticar(usuario, senha);
-            userSession.setEmpresaLogada(empresa);
+            UsuarioResponse usuario = usuarioService.autenticar(email, senha);
 
-            navegarParaPerfil();
+            userSession.limparSessao();
+            userSession.setUsuarioLogado(usuario);
 
-        } catch (Exception e) {
+            navegarParaPerfilUsuario(usuario.id());
+
+        } catch (ResponseStatusException e) {
+            exibirErro(e.getReason() != null ? e.getReason() : "Usuário ou senha inválidos.");
             lblMensagem.setStyle("-fx-text-fill: #9c0000;");
             lblMensagem.setText("Usuário ou senha inválidos.");
+        } catch (IOException e) {
+            lblMensagem.setStyle("-fx-text-fill: #9c0000;");
+            lblMensagem.setText("Erro ao carregar a tela de perfil.");
         }
     }
 
-    private void navegarParaPerfil() throws IOException {
+    private void navegarParaPerfilUsuario(Long usuarioId) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PerfilUsuario.fxml"));
+        loader.setControllerFactory(applicationContext::getBean);
+        Parent root = loader.load();
+
+        PerfilUsuarioController perfilUsuarioController = loader.getController();
+        perfilUsuarioController.carregarPerfil(usuarioId);
+
+        Stage stage = (Stage) txtUsuario.getScene().getWindow();
+        stage.setScene(new Scene(root, 1020, 680));
+        stage.setTitle("Perfil do Usuário - Gestão de Lixo Eletrônico");
+        stage.centerOnScreen();
+    }
+
+    public void navegarParaPerfilEmpresa(Long empresaId) throws IOException {
+        EmpresaResponse empresa = empresaService.buscarPerfilPorId(empresaId);
+        userSession.limparSessao();
+        userSession.setEmpresaLogada(empresa);
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PerfilEmpresa.fxml"));
         loader.setControllerFactory(applicationContext::getBean);
         Parent root = loader.load();
@@ -75,5 +109,10 @@ public class LoginController {
         stage.setScene(new Scene(root));
         stage.setTitle("Perfil da Empresa - Gestão de Lixo Eletrônico");
         stage.centerOnScreen();
+    }
+
+    private void exibirErro(String mensagem) {
+        lblMensagem.setStyle("-fx-text-fill: #9c0000;");
+        lblMensagem.setText(mensagem);
     }
 }

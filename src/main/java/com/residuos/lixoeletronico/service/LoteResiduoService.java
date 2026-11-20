@@ -12,17 +12,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.residuos.lixoeletronico.controller.PerfilUsuarioController.ItemHistoricoDTO;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoCreateRequest;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoMapper;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoResponse;
+import com.residuos.lixoeletronico.dto.usuario.ItemHistoricoDTO;
 import com.residuos.lixoeletronico.model.Empresa;
 import com.residuos.lixoeletronico.model.LoteResiduo;
+import com.residuos.lixoeletronico.model.Usuario;
 import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
 import com.residuos.lixoeletronico.model.enums.StatusLote;
 import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
 import com.residuos.lixoeletronico.repository.EmpresaRepository;
 import com.residuos.lixoeletronico.repository.LoteResiduoRepository;
+import com.residuos.lixoeletronico.repository.UsuarioRepository;
 
 import jakarta.persistence.criteria.Predicate;
 
@@ -31,14 +33,24 @@ public class LoteResiduoService {
 
     private final LoteResiduoRepository loteResiduoRepository;
     private final EmpresaRepository empresaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public LoteResiduoService(
         LoteResiduoRepository loteResiduoRepository,
-        EmpresaRepository empresaRepository
+        EmpresaRepository empresaRepository,
+        UsuarioRepository usuarioRepository
     ) {
         this.loteResiduoRepository = loteResiduoRepository;
         this.empresaRepository = empresaRepository;
+        this.usuarioRepository = usuarioRepository;
     }
+
+        public LoteResiduoService(
+            LoteResiduoRepository loteResiduoRepository,
+            EmpresaRepository empresaRepository
+        ) {
+            this(loteResiduoRepository, empresaRepository, null);
+        }
 
     @Transactional
     public LoteResiduoResponse registrarRecepcao(
@@ -55,6 +67,19 @@ public class LoteResiduoService {
             );
 
         LoteResiduo lote = LoteResiduoMapper.toEntity(request, empresa);
+
+        if (request.usuarioId() != null && usuarioRepository != null) {
+            Usuario usuario = usuarioRepository
+                .findById(request.usuarioId())
+                .orElseThrow(() ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado com o ID: " + request.usuarioId()
+                    )
+                );
+            lote.setUsuario(usuario);
+        }
+
         LoteResiduo loteSalvo = loteResiduoRepository.save(lote);
         LoteResiduoResponse response = LoteResiduoMapper.toResponse(loteSalvo);
 
@@ -99,7 +124,7 @@ public class LoteResiduoService {
                 );
             }
 
-            return cb.and(predicates.toArray(new Predicate[0]));
+            return cb.and(predicates.toArray(Predicate[]::new));
         };
 
         Sort sort = Sort.by(
