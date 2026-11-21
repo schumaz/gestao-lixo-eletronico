@@ -5,12 +5,17 @@ import com.residuos.lixoeletronico.dto.empresa.EnderecoDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UsuarioCreateRequest(
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 150, message = "Nome deve ter no máximo 150 caracteres")
     String nome,
+
+    @NotBlank(message = "CPF é obrigatório")
+    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido")
+    String cpf,
 
     @NotBlank(message = "E-mail é obrigatório")
     @Email(message = "E-mail inválido")
@@ -28,4 +33,15 @@ public record UsuarioCreateRequest(
 
     @Valid
     EnderecoDTO endereco
-) {}
+) {
+    public UsuarioCreateRequest(
+            String nome,
+            String email,
+            String senha,
+            String telefone,
+            String urlFoto,
+            EnderecoDTO endereco
+    ) {
+        this(nome, null, email, senha, telefone, urlFoto, endereco);
+    }
+}

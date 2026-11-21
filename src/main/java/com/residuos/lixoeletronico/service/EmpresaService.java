@@ -1,5 +1,8 @@
 package com.residuos.lixoeletronico.service;
 
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,25 +13,55 @@ import com.residuos.lixoeletronico.dto.empresa.EmpresaMapper;
 import com.residuos.lixoeletronico.dto.empresa.EmpresaResponse;
 import com.residuos.lixoeletronico.model.Empresa;
 import com.residuos.lixoeletronico.repository.EmpresaRepository;
+import com.residuos.lixoeletronico.repository.UsuarioRepository;
 
 @Service
 public class EmpresaService {
 
     private final EmpresaRepository repository;
+    private final UsuarioRepository usuarioRepository;
+
+    @Autowired
+    public EmpresaService(
+            EmpresaRepository repository,
+            UsuarioRepository usuarioRepository
+    ) {
+        this.repository = repository;
+        this.usuarioRepository = usuarioRepository;
+    }
 
     public EmpresaService(EmpresaRepository repository) {
-        this.repository = repository;
+        this(repository, null);
     }
 
     @Transactional
     public EmpresaResponse criarEmpresa(EmpresaCreateRequest request) {
-        if (repository.existsByEmail(request.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado: " + request.email());
+        String emailNormalizado = request.email().trim().toLowerCase(Locale.ROOT);
+        String cnpjNormalizado = request.cnpj() != null ? request.cnpj().replaceAll("\\D", "") : null;
+
+        boolean emailEmUsuario = usuarioRepository != null
+                && usuarioRepository.existsByEmailIgnoreCase(emailNormalizado);
+
+        if (repository.existsByEmailIgnoreCase(emailNormalizado) || emailEmUsuario) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Este e-mail já está cadastrado no sistema."
+            );
+        }
+
+        if (cnpjNormalizado != null && !cnpjNormalizado.isBlank()
+                && repository.existsByCnpj(cnpjNormalizado)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Este CNPJ já está cadastrado no sistema."
+            );
         }
 
         Empresa novaEmpresa = EmpresaMapper.toEntity(request);
-        Empresa empresaSalva = repository.save(novaEmpresa);
+        novaEmpresa.setEmail(emailNormalizado);
+        novaEmpresa.setCnpj(cnpjNormalizado);
 
+        Empresa empresaSalva = repository.save(novaEmpresa);
         return EmpresaMapper.toResponse(empresaSalva);
     }
 

@@ -1,11 +1,17 @@
 package com.residuos.lixoeletronico.controller;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.residuos.lixoeletronico.config.UserSession;
 import com.residuos.lixoeletronico.dto.usuario.ItemHistoricoDTO;
 import com.residuos.lixoeletronico.model.Endereco;
 import com.residuos.lixoeletronico.model.Usuario;
@@ -13,7 +19,11 @@ import com.residuos.lixoeletronico.service.LoteResiduoService;
 import com.residuos.lixoeletronico.service.UsuarioService;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,6 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 @Component
 public class PerfilUsuarioController {
@@ -34,19 +45,63 @@ public class PerfilUsuarioController {
     @FXML private Label lblMaterialMaisDescartado;
     @FXML private Label lblTotalKg;
     @FXML private VBox containerHistorico;
+    @FXML private Button btnSair;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final UsuarioService usuarioService;
     private final LoteResiduoService loteResiduoService;
+    private final UserSession userSession;
+    private final ApplicationContext applicationContext;
+    private static final Logger LOGGER  = LoggerFactory.getLogger(PerfilUsuarioController.class);
 
-    public PerfilUsuarioController(UsuarioService usuarioService, LoteResiduoService loteResiduoService) {
+    @Autowired
+    public PerfilUsuarioController(
+            UsuarioService usuarioService,
+            LoteResiduoService loteResiduoService,
+            UserSession userSession,
+            ApplicationContext applicationContext
+    ) {
         this.usuarioService = usuarioService;
         this.loteResiduoService = loteResiduoService;
+        this.userSession = userSession;
+        this.applicationContext = applicationContext;
+    }
+
+    public PerfilUsuarioController(
+            UsuarioService usuarioService,
+            LoteResiduoService loteResiduoService
+    ) {
+        this(usuarioService, loteResiduoService, null, null);
     }
 
     @FXML
     public void initialize() {
+    }
+
+    @FXML
+    public void handleLogout() {
+        if (userSession != null) {
+            userSession.logout();
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+            if (applicationContext != null) {
+                loader.setControllerFactory(applicationContext::getBean);
+            }
+            Parent root = loader.load();
+
+            Stage stage = (Stage) (btnSair != null && btnSair.getScene() != null
+                    ? btnSair.getScene().getWindow()
+                    : lblNome.getScene().getWindow());
+
+            stage.setScene(new Scene(root, 800, 600));
+            stage.setTitle("Login - Gestão de Lixo Eletrônico");
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            LOGGER.error("Erro ao carregar a tela de login ao encerrar sessão", e);
+        }
     }
 
     public void carregarPerfil(Long usuarioId) {

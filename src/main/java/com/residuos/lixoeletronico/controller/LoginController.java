@@ -82,6 +82,22 @@ public class LoginController {
         }
     }
 
+    @FXML
+public void handleAbrirCadastro() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cadastro.fxml"));
+        loader.setControllerFactory(applicationContext::getBean);
+        Parent root = loader.load();
+
+        Stage stage = (Stage) txtUsuario.getScene().getWindow();
+        stage.setScene(new Scene(root, 960, 760));
+        stage.setTitle("Cadastro - Gestão de Lixo Eletrônico");
+        stage.centerOnScreen();
+    } catch (IOException e) {
+        exibirErro("Erro ao abrir a tela de cadastro.");
+    }
+}
+
     private void navegarParaPerfilUsuario(Long usuarioId) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PerfilUsuario.fxml"));
         loader.setControllerFactory(applicationContext::getBean);

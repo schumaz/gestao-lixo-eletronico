@@ -1,5 +1,8 @@
 package com.residuos.lixoeletronico.service;
 
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,30 +13,54 @@ import com.residuos.lixoeletronico.dto.usuario.UsuarioMapper;
 import com.residuos.lixoeletronico.dto.usuario.UsuarioResponse;
 import com.residuos.lixoeletronico.dto.usuario.UsuarioUpdateRequest;
 import com.residuos.lixoeletronico.model.Usuario;
+import com.residuos.lixoeletronico.repository.EmpresaRepository;
 import com.residuos.lixoeletronico.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository empresaRepository;
+
+    @Autowired
+    public UsuarioService(
+            UsuarioRepository usuarioRepository,
+            EmpresaRepository empresaRepository
+    ) {
+        this.usuarioRepository = usuarioRepository;
+        this.empresaRepository = empresaRepository;
+    }
 
     public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+        this(usuarioRepository, null);
     }
 
     @Transactional
     public UsuarioResponse cadastrar(UsuarioCreateRequest request) {
-        String emailNormalizado = request.email().trim().toLowerCase();
+        String emailNormalizado = request.email().trim().toLowerCase(Locale.ROOT);
+        String cpfNormalizado = request.cpf() != null ? request.cpf().replaceAll("\\D", "") : null;
 
-        if (usuarioRepository.existsByEmail(emailNormalizado)) {
+        boolean emailEmEmpresa = empresaRepository != null
+                && empresaRepository.existsByEmailIgnoreCase(emailNormalizado);
+
+        if (usuarioRepository.existsByEmailIgnoreCase(emailNormalizado) || emailEmEmpresa) {
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
-                "Já existe um usuário cadastrado com o e-mail: " + emailNormalizado
+                "Este e-mail já está cadastrado no sistema."
+            );
+        }
+
+        if (cpfNormalizado != null && !cpfNormalizado.isBlank()
+                && usuarioRepository.existsByCpf(cpfNormalizado)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Este CPF já está cadastrado no sistema."
             );
         }
 
         Usuario usuario = UsuarioMapper.toEntity(request);
         usuario.setEmail(emailNormalizado);
+        usuario.setCpf(cpfNormalizado);
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         return UsuarioMapper.toResponse(usuarioSalvo);
@@ -57,7 +84,7 @@ public class UsuarioService {
             );
         }
 
-        String emailNormalizado = email.trim().toLowerCase();
+        String emailNormalizado = email.trim().toLowerCase(Locale.ROOT);
 
         Usuario usuario = usuarioRepository.findByEmail(emailNormalizado)
             .orElseThrow(() -> new ResponseStatusException(

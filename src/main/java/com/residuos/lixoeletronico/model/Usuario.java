@@ -84,4 +84,15 @@ public class Usuario {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Column(name = "cpf", unique = true, length = 14)
+    private String cpf;
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
 }
