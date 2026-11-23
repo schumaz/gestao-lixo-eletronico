@@ -56,8 +56,7 @@ public class LoginController {
         String senha = txtSenha.getText() != null ? txtSenha.getText().trim() : "";
 
         if (email.isEmpty() || senha.isEmpty()) {
-            lblMensagem.setStyle("-fx-text-fill: #9c0000;");
-            lblMensagem.setText("Preencha todos os campos!");
+            exibirErro("Preencha todos os campos!");
             return;
         }
 
@@ -65,38 +64,43 @@ public class LoginController {
             lblMensagem.setStyle("-fx-text-fill: #006600;");
             lblMensagem.setText("Autenticando...");
 
-            UsuarioResponse usuario = usuarioService.autenticar(email, senha);
+            try {
+                UsuarioResponse usuario = usuarioService.autenticar(email, senha);
+                userSession.limparSessao();
+                userSession.setUsuarioLogado(usuario);
+                navegarParaPerfilUsuario(usuario.id());
+                return;
+            } catch (ResponseStatusException ignored) {
+                // Caso não seja usuário pessoa física, tenta autenticar como empresa
+            }
 
+            EmpresaResponse empresa = empresaService.autenticar(email, senha);
             userSession.limparSessao();
-            userSession.setUsuarioLogado(usuario);
-
-            navegarParaPerfilUsuario(usuario.id());
+            userSession.setEmpresaLogada(empresa);
+            abrirTelaPerfilEmpresa();
 
         } catch (ResponseStatusException e) {
-            exibirErro(e.getReason() != null ? e.getReason() : "Usuário ou senha inválidos.");
-            lblMensagem.setStyle("-fx-text-fill: #9c0000;");
-            lblMensagem.setText("Usuário ou senha inválidos.");
+            exibirErro("Usuário ou senha inválidos.");
         } catch (IOException e) {
-            lblMensagem.setStyle("-fx-text-fill: #9c0000;");
-            lblMensagem.setText("Erro ao carregar a tela de perfil.");
+            exibirErro("Erro ao carregar a tela de perfil.");
         }
     }
 
     @FXML
-public void handleAbrirCadastro() {
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cadastro.fxml"));
-        loader.setControllerFactory(applicationContext::getBean);
-        Parent root = loader.load();
+    public void handleAbrirCadastro() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cadastro.fxml"));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
 
-        Stage stage = (Stage) txtUsuario.getScene().getWindow();
-        stage.setScene(new Scene(root, 960, 760));
-        stage.setTitle("Cadastro - Gestão de Lixo Eletrônico");
-        stage.centerOnScreen();
-    } catch (IOException e) {
-        exibirErro("Erro ao abrir a tela de cadastro.");
+            Stage stage = (Stage) txtUsuario.getScene().getWindow();
+            stage.setScene(new Scene(root, 960, 760));
+            stage.setTitle("Cadastro - Gestão de Lixo Eletrônico");
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            exibirErro("Erro ao abrir a tela de cadastro.");
+        }
     }
-}
 
     private void navegarParaPerfilUsuario(Long usuarioId) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PerfilUsuario.fxml"));
@@ -116,7 +120,10 @@ public void handleAbrirCadastro() {
         EmpresaResponse empresa = empresaService.buscarPerfilPorId(empresaId);
         userSession.limparSessao();
         userSession.setEmpresaLogada(empresa);
+        abrirTelaPerfilEmpresa();
+    }
 
+    private void abrirTelaPerfilEmpresa() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PerfilEmpresa.fxml"));
         loader.setControllerFactory(applicationContext::getBean);
         Parent root = loader.load();

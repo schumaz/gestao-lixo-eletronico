@@ -85,8 +85,7 @@
 
             <Button onAction="#handleAbrirCadastro"
                style="-fx-background-color: transparent; -fx-text-fill: #1e293b; -fx-font-size: 12px; -fx-font-weight: bold; -fx-underline: true; -fx-cursor: hand;"
-               text="Não possui conta? Cadastre-se" 
-            /Button>
+               text="Não possui conta? Cadastre-se" />
          </children>
       </VBox>
    </children>

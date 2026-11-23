@@ -33,7 +33,7 @@ class EmpresaServiceTest {
     void deveCriarEmpresaComSucesso() {
         EmpresaCreateRequest request = new EmpresaCreateRequest("Eco Nova", "nova@eco.com", "senha123", null, null);
 
-        when(repository.existsByEmail("nova@eco.com")).thenReturn(false);
+        when(repository.existsByEmailIgnoreCase("nova@eco.com")).thenReturn(false);
         when(repository.save(any(Empresa.class))).thenAnswer(invocation -> {
             Empresa e = invocation.getArgument(0);
             e.setId(10L);
@@ -54,7 +54,7 @@ class EmpresaServiceTest {
     void deveLancarConflictQuandoEmailJaExiste() {
         EmpresaCreateRequest request = new EmpresaCreateRequest("Eco Duplicada", "jaexiste@eco.com", "senha123", null, null);
 
-        when(repository.existsByEmail("jaexiste@eco.com")).thenReturn(true);
+        when(repository.existsByEmailIgnoreCase("jaexiste@eco.com")).thenReturn(true);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.criarEmpresa(request));
 

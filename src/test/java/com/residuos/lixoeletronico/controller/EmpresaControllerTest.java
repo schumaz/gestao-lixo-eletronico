@@ -50,7 +50,7 @@ class EmpresaControllerTest {
     @Test
     @DisplayName("POST /api/empresas deve cadastrar empresa e retornar 201 Created")
     void deveCadastrarEmpresaComSucesso() throws Exception {
-        EmpresaCreateRequest request = new EmpresaCreateRequest("Tech Recicla", "tech@recicla.com", "senhaForte123", null, null);
+        EmpresaCreateRequest request = new EmpresaCreateRequest("Tech Recicla", "12345678000195", "tech@recicla.com", "senhaForte123", null, null);
         EmpresaResponse response = new EmpresaResponse(
                 1L, "Tech Recicla", "tech@recicla.com",
                 null, null, null, null, null,

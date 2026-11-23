@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,7 @@ public class LoteResiduoService {
     private final EmpresaRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
 
+    @Autowired
     public LoteResiduoService(
         LoteResiduoRepository loteResiduoRepository,
         EmpresaRepository empresaRepository,
@@ -45,12 +47,12 @@ public class LoteResiduoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-        public LoteResiduoService(
-            LoteResiduoRepository loteResiduoRepository,
-            EmpresaRepository empresaRepository
-        ) {
-            this(loteResiduoRepository, empresaRepository, null);
-        }
+    public LoteResiduoService(
+        LoteResiduoRepository loteResiduoRepository,
+        EmpresaRepository empresaRepository
+    ) {
+        this(loteResiduoRepository, empresaRepository, null);
+    }
 
     @Transactional
     public LoteResiduoResponse registrarRecepcao(
