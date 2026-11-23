@@ -72,13 +72,14 @@ public final class UsuarioMapper {
         return new UsuarioPerfilResponse(
             usuario.getId(),
             usuario.getNome(),
+            usuario.getCpf(),
             usuario.getEmail(),
             usuario.getTelefone(),
             usuario.getUrlFoto(),
             EmpresaMapper.toEnderecoDTO(usuario.getEndereco()),
-            ultimoDeposito,
-            materialMaisDescartado,
             totalKgDescartado,
+            materialMaisDescartado,
+            ultimoDeposito,
             historico != null ? historico : List.of()
         );
     }

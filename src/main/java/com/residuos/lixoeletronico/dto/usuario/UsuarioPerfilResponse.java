@@ -7,12 +7,13 @@ import com.residuos.lixoeletronico.dto.empresa.EnderecoDTO;
 public record UsuarioPerfilResponse(
     Long id,
     String nome,
+    String cpf,
     String email,
     String telefone,
     String urlFoto,
     EnderecoDTO endereco,
-    String ultimoDeposito,
-    String materialMaisDescartado,
     double totalKgDescartado,
+    String materialMaisDescartado,
+    String ultimoDeposito,
     List<ItemHistoricoDTO> historico
 ) {}
