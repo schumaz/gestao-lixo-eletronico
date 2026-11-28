@@ -99,6 +99,25 @@ public class LoteResiduoService {
         CategoriaMaterial categoriaMaterial,
         UrgenciaDescarte urgenciaDescarte
     ) {
+        return listarLotes(
+            empresaId,
+            StatusLote.EM_ESTOQUE,
+            categoriaMaterial,
+            urgenciaDescarte
+        );
+    }
+
+    /**
+     * Lista lotes aplicando filtros opcionais de empresa, status, categoria de material
+     * e urgência de descarte, ordenados da recepção mais recente para a mais antiga.
+     */
+    @Transactional(readOnly = true)
+    public List<LoteResiduoResponse> listarLotes(
+        Long empresaId,
+        StatusLote status,
+        CategoriaMaterial categoriaMaterial,
+        UrgenciaDescarte urgenciaDescarte
+    ) {
         if (empresaId != null && !empresaRepository.existsById(empresaId)) {
             throw new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -108,8 +127,10 @@ public class LoteResiduoService {
 
         Specification<LoteResiduo> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("status"), StatusLote.EM_ESTOQUE));
 
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
             if (empresaId != null) {
                 predicates.add(
                     cb.equal(root.get("empresa").get("id"), empresaId)
@@ -139,6 +160,92 @@ public class LoteResiduoService {
             .stream()
             .map(LoteResiduoMapper::toResponse)
             .toList();
+    }
+
+    /**
+     * Atualiza o status de um lote pertencente a uma empresa, validando o ciclo de vida
+     * {@code EM_ESTOQUE -> EM_PROCESSAMENTO -> DESTINADO}.
+     */
+    @Transactional
+    public LoteResiduoResponse atualizarStatus(
+        Long empresaId,
+        Long loteId,
+        StatusLote novoStatus
+    ) {
+        if (loteId == null) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "ID do lote é obrigatório."
+            );
+        }
+        if (novoStatus == null) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Novo status do lote é obrigatório."
+            );
+        }
+
+        LoteResiduo lote = buscarLoteParaAtualizacao(empresaId, loteId);
+        StatusLote statusAtual = lote.getStatus();
+
+        if (statusAtual == null || !statusAtual.podeTransicionarPara(novoStatus)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Transição de status inválida de " +
+                    statusAtual +
+                    " para " +
+                    novoStatus +
+                    ". Fluxo permitido: EM_ESTOQUE -> EM_PROCESSAMENTO -> DESTINADO."
+            );
+        }
+
+        lote.setStatus(novoStatus);
+        LoteResiduo loteAtualizado = loteResiduoRepository.save(lote);
+        return LoteResiduoMapper.toResponse(loteAtualizado);
+    }
+
+    /**
+     * Atualiza o status de um lote pelo seu ID, validando o ciclo de vida
+     * {@code EM_ESTOQUE -> EM_PROCESSAMENTO -> DESTINADO}.
+     */
+    @Transactional
+    public LoteResiduoResponse atualizarStatus(
+        Long loteId,
+        StatusLote novoStatus
+    ) {
+        return atualizarStatus(null, loteId, novoStatus);
+    }
+
+    private LoteResiduo buscarLoteParaAtualizacao(Long empresaId, Long loteId) {
+        if (empresaId != null) {
+            if (!empresaRepository.existsById(empresaId)) {
+                throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Empresa não encontrada com o ID: " + empresaId
+                );
+            }
+
+            return loteResiduoRepository
+                .findByIdAndEmpresaId(loteId, empresaId)
+                .orElseThrow(() ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Lote não encontrado com o ID: " +
+                            loteId +
+                            " para a empresa: " +
+                            empresaId
+                    )
+                );
+        }
+
+        return loteResiduoRepository
+            .findById(loteId)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Lote não encontrado com o ID: " + loteId
+                )
+            );
     }
 
     @Transactional(readOnly = true)
