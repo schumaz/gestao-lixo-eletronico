@@ -89,7 +89,7 @@ class RegistroRecepcaoControllerTest {
             null
         );
         when(apiClient.buscarPerfilEmpresa(1L)).thenReturn(empresaAtualizada);
-        when(apiClient.listarLotesEmEstoque(1L, null, null)).thenReturn(
+        when(apiClient.listarLotes(1L, null, null, null)).thenReturn(
             List.of(loteExistente)
         );
 
@@ -121,6 +121,9 @@ class RegistroRecepcaoControllerTest {
             ComboBox<?> cbUrgencia = (ComboBox<?>) root.lookup(
                 "#cbUrgenciaDescarte"
             );
+            ComboBox<?> cbFiltroStatus = (ComboBox<?>) root.lookup(
+                "#cbFiltroStatus"
+            );
             ComboBox<?> cbFiltroCategoria = (ComboBox<?>) root.lookup(
                 "#cbFiltroCategoria"
             );
@@ -130,6 +133,9 @@ class RegistroRecepcaoControllerTest {
             DatePicker dpData = (DatePicker) root.lookup("#dpDataRecepcao");
             TableView<?> tabela = (TableView<?>) root.lookup(
                 "#tblLotesEstoque"
+            );
+            Button btnAvancarStatus = (Button) root.lookup(
+                "#btnAvancarStatus"
             );
 
             assertEquals("120 kg", lblMassaTotal.getText());
@@ -144,6 +150,11 @@ class RegistroRecepcaoControllerTest {
                 cbUrgencia.getItems().size()
             );
             assertEquals(
+                StatusLote.values().length + 1,
+                cbFiltroStatus.getItems().size()
+            );
+            assertNull(cbFiltroStatus.getValue());
+            assertEquals(
                 CategoriaMaterial.values().length + 1,
                 cbFiltroCategoria.getItems().size()
             );
@@ -154,6 +165,8 @@ class RegistroRecepcaoControllerTest {
             assertEquals(UrgenciaDescarte.MEDIA, cbUrgencia.getValue());
             assertEquals(LocalDate.now(), dpData.getValue());
             assertEquals(1, tabela.getItems().size());
+            assertEquals(6, tabela.getColumns().size());
+            assertTrue(btnAvancarStatus.isDisable());
             return null;
         });
     }
@@ -198,7 +211,7 @@ class RegistroRecepcaoControllerTest {
         when(apiClient.buscarPerfilEmpresa(1L))
             .thenReturn(criarEmpresa(1L, new BigDecimal("50.000")))
             .thenReturn(criarEmpresa(1L, new BigDecimal("62.500")));
-        when(apiClient.listarLotesEmEstoque(1L, null, null))
+        when(apiClient.listarLotes(1L, null, null, null))
             .thenReturn(List.of())
             .thenReturn(List.of(loteSalvo));
         when(apiClient.buscarUsuarioPorEmail("mariana@email.com")).thenReturn(
@@ -331,7 +344,7 @@ class RegistroRecepcaoControllerTest {
 
     @Test
     @DisplayName(
-        "Deve filtrar lotes em estoque pela API por categoria e urgência e permitir limpar filtros"
+        "Deve filtrar lotes pela API por status, categoria e urgência e permitir limpar filtros"
     )
     @SuppressWarnings("unchecked")
     void deveFiltrarELimparFiltrosEstoqueViaApi() throws Exception {
@@ -355,7 +368,7 @@ class RegistroRecepcaoControllerTest {
             Instant.now(),
             null
         );
-        LoteResiduoResponse loteNormal = new LoteResiduoResponse(
+        LoteResiduoResponse loteProcessando = new LoteResiduoResponse(
             16L,
             1L,
             "Ana Paula",
@@ -365,7 +378,7 @@ class RegistroRecepcaoControllerTest {
             "Teclados",
             new BigDecimal("10.000"),
             UrgenciaDescarte.BAIXA,
-            StatusLote.EM_ESTOQUE,
+            StatusLote.EM_PROCESSAMENTO,
             Instant.now(),
             null
         );
@@ -373,16 +386,17 @@ class RegistroRecepcaoControllerTest {
         when(apiClient.buscarPerfilEmpresa(1L)).thenReturn(
             criarEmpresa(1L, new BigDecimal("80.000"))
         );
-        when(apiClient.listarLotesEmEstoque(1L, null, null)).thenReturn(
-            List.of(loteCritico, loteNormal)
+        when(apiClient.listarLotes(1L, null, null, null)).thenReturn(
+            List.of(loteCritico, loteProcessando)
         );
         when(
-            apiClient.listarLotesEmEstoque(
+            apiClient.listarLotes(
                 1L,
-                CategoriaMaterial.PILHAS_BATERIAS,
-                UrgenciaDescarte.CRITICA
+                StatusLote.EM_PROCESSAMENTO,
+                CategoriaMaterial.INFORMATICA,
+                UrgenciaDescarte.BAIXA
             )
-        ).thenReturn(List.of(loteCritico));
+        ).thenReturn(List.of(loteProcessando));
 
         RegistroRecepcaoController controller = new RegistroRecepcaoController(
             apiClient,
@@ -400,6 +414,8 @@ class RegistroRecepcaoControllerTest {
         });
 
         executarNoJavaFx(() -> {
+            ComboBox<StatusLote> cbFiltroStatus =
+                (ComboBox<StatusLote>) root.lookup("#cbFiltroStatus");
             ComboBox<CategoriaMaterial> cbFiltroCategoria =
                 (ComboBox<CategoriaMaterial>) root.lookup("#cbFiltroCategoria");
             ComboBox<UrgenciaDescarte> cbFiltroUrgencia =
@@ -413,32 +429,253 @@ class RegistroRecepcaoControllerTest {
             );
 
             assertEquals(2, tabela.getItems().size());
-            assertEquals("15.5 kg", lblMassaEstoque.getText());
+            assertEquals("5.5 kg", lblMassaEstoque.getText());
             assertEquals("EM ESTOQUE ATUAL", lblTituloEstoque.getText());
 
-            cbFiltroCategoria.setValue(CategoriaMaterial.PILHAS_BATERIAS);
-            cbFiltroUrgencia.setValue(UrgenciaDescarte.CRITICA);
+            cbFiltroStatus.setValue(StatusLote.EM_PROCESSAMENTO);
+            cbFiltroCategoria.setValue(CategoriaMaterial.INFORMATICA);
+            cbFiltroUrgencia.setValue(UrgenciaDescarte.BAIXA);
             controller.handleFiltrarEstoque();
 
             assertEquals(1, tabela.getItems().size());
-            assertEquals("5.5 kg", lblMassaEstoque.getText());
-            assertEquals("EM ESTOQUE (FILTRADO)", lblTituloEstoque.getText());
+            assertEquals("10 kg", lblMassaEstoque.getText());
+            assertEquals(
+                "EM PROCESSAMENTO (FILTRADO)",
+                lblTituloEstoque.getText()
+            );
 
             controller.handleLimparFiltros();
 
+            assertNull(cbFiltroStatus.getValue());
             assertNull(cbFiltroCategoria.getValue());
             assertNull(cbFiltroUrgencia.getValue());
             assertEquals(2, tabela.getItems().size());
+            assertEquals("5.5 kg", lblMassaEstoque.getText());
             assertEquals("EM ESTOQUE ATUAL", lblTituloEstoque.getText());
             return null;
         });
 
-        verify(apiClient, times(1)).listarLotesEmEstoque(
+        verify(apiClient, times(1)).listarLotes(
             1L,
-            CategoriaMaterial.PILHAS_BATERIAS,
-            UrgenciaDescarte.CRITICA
+            StatusLote.EM_PROCESSAMENTO,
+            CategoriaMaterial.INFORMATICA,
+            UrgenciaDescarte.BAIXA
         );
-        verify(apiClient, times(2)).listarLotesEmEstoque(1L, null, null);
+        verify(apiClient, times(2)).listarLotes(1L, null, null, null);
+    }
+
+    @Test
+    @DisplayName(
+        "Deve avançar status do lote selecionado (Em Estoque -> Em Processamento -> Destinado) e atualizar balanço em estoque"
+    )
+    @SuppressWarnings("unchecked")
+    void deveAvancarStatusDoLoteSelecionadoPelaApi() throws Exception {
+        LoteResiduoApiClient apiClient = mock(LoteResiduoApiClient.class);
+        ApplicationContext appContext = mock(ApplicationContext.class);
+
+        UserSession userSession = new UserSession();
+        userSession.setEmpresaLogada(criarEmpresa(1L, new BigDecimal("50.000")));
+
+        LoteResiduoResponse loteEstoque = new LoteResiduoResponse(
+            10L,
+            1L,
+            "Mariana",
+            "3499999",
+            LocalDate.now(),
+            CategoriaMaterial.INFORMATICA,
+            "Notebooks",
+            new BigDecimal("20.000"),
+            UrgenciaDescarte.MEDIA,
+            StatusLote.EM_ESTOQUE,
+            Instant.now(),
+            null
+        );
+        LoteResiduoResponse loteProcessando = new LoteResiduoResponse(
+            10L,
+            1L,
+            "Mariana",
+            "3499999",
+            LocalDate.now(),
+            CategoriaMaterial.INFORMATICA,
+            "Notebooks",
+            new BigDecimal("20.000"),
+            UrgenciaDescarte.MEDIA,
+            StatusLote.EM_PROCESSAMENTO,
+            Instant.now(),
+            Instant.now()
+        );
+        LoteResiduoResponse loteDestinado = new LoteResiduoResponse(
+            10L,
+            1L,
+            "Mariana",
+            "3499999",
+            LocalDate.now(),
+            CategoriaMaterial.INFORMATICA,
+            "Notebooks",
+            new BigDecimal("20.000"),
+            UrgenciaDescarte.MEDIA,
+            StatusLote.DESTINADO,
+            Instant.now(),
+            Instant.now()
+        );
+
+        when(apiClient.buscarPerfilEmpresa(1L)).thenReturn(
+            criarEmpresa(1L, new BigDecimal("50.000"))
+        );
+        when(apiClient.listarLotes(1L, null, null, null))
+            .thenReturn(List.of(loteEstoque))
+            .thenReturn(List.of(loteProcessando))
+            .thenReturn(List.of(loteDestinado));
+        when(
+            apiClient.atualizarStatusLote(
+                1L,
+                10L,
+                StatusLote.EM_PROCESSAMENTO
+            )
+        ).thenReturn(loteProcessando);
+        when(apiClient.atualizarStatusLote(1L, 10L, StatusLote.DESTINADO))
+            .thenReturn(loteDestinado);
+
+        RegistroRecepcaoController controller = new RegistroRecepcaoController(
+            apiClient,
+            userSession,
+            appContext,
+            DIRECT_EXECUTOR
+        );
+
+        Parent root = executarNoJavaFx(() -> {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/RegistroRecepcao.fxml")
+            );
+            loader.setControllerFactory(clazz -> controller);
+            return loader.load();
+        });
+
+        executarNoJavaFx(() -> {
+            TableView<LoteResiduoResponse> tabela =
+                (TableView<LoteResiduoResponse>) root.lookup("#tblLotesEstoque");
+            Button btnAvancarStatus = (Button) root.lookup(
+                "#btnAvancarStatus"
+            );
+            Label lblLoteSelecionado = (Label) root.lookup(
+                "#lblLoteSelecionado"
+            );
+            Label lblMassaEstoque = (Label) root.lookup("#lblMassaEmEstoque");
+            Label lblMensagem = (Label) root.lookup("#lblMensagem");
+
+            assertTrue(btnAvancarStatus.isDisable());
+            assertEquals("20 kg", lblMassaEstoque.getText());
+
+            // Seleciona lote EM_ESTOQUE -> botão habilita "Iniciar Processamento"
+            tabela.getSelectionModel().select(0);
+            assertFalse(btnAvancarStatus.isDisable());
+            assertEquals("Iniciar Processamento", btnAvancarStatus.getText());
+            assertTrue(lblLoteSelecionado.getText().contains("Em Estoque"));
+
+            // Avança para EM_PROCESSAMENTO
+            controller.handleAvancarStatus();
+            assertEquals("0 kg", lblMassaEstoque.getText());
+            assertFalse(btnAvancarStatus.isDisable());
+            assertEquals("Marcar como Destinado", btnAvancarStatus.getText());
+            assertTrue(
+                lblMensagem.getText().contains("Em Processamento")
+            );
+
+            // Avança para DESTINADO
+            controller.handleAvancarStatus();
+            assertTrue(btnAvancarStatus.isDisable());
+            assertEquals("Lote Destinado", btnAvancarStatus.getText());
+            assertTrue(lblMensagem.getText().contains("Destinado"));
+            return null;
+        });
+
+        verify(apiClient, times(1)).atualizarStatusLote(
+            1L,
+            10L,
+            StatusLote.EM_PROCESSAMENTO
+        );
+        verify(apiClient, times(1)).atualizarStatusLote(
+            1L,
+            10L,
+            StatusLote.DESTINADO
+        );
+    }
+
+    @Test
+    @DisplayName(
+        "Deve exibir erro e manter controles consistentes quando falhar a atualização de status na API"
+    )
+    @SuppressWarnings("unchecked")
+    void deveExibirErroQuandoAtualizarStatusFalhar() throws Exception {
+        LoteResiduoApiClient apiClient = mock(LoteResiduoApiClient.class);
+        ApplicationContext appContext = mock(ApplicationContext.class);
+
+        UserSession userSession = new UserSession();
+        userSession.setEmpresaLogada(criarEmpresa(1L, new BigDecimal("50.000")));
+
+        LoteResiduoResponse loteEstoque = new LoteResiduoResponse(
+            10L,
+            1L,
+            "Mariana",
+            "3499999",
+            LocalDate.now(),
+            CategoriaMaterial.INFORMATICA,
+            "Notebooks",
+            new BigDecimal("20.000"),
+            UrgenciaDescarte.MEDIA,
+            StatusLote.EM_ESTOQUE,
+            Instant.now(),
+            null
+        );
+
+        when(apiClient.buscarPerfilEmpresa(1L)).thenReturn(
+            criarEmpresa(1L, new BigDecimal("50.000"))
+        );
+        when(apiClient.listarLotes(1L, null, null, null)).thenReturn(
+            List.of(loteEstoque)
+        );
+        when(
+            apiClient.atualizarStatusLote(
+                1L,
+                10L,
+                StatusLote.EM_PROCESSAMENTO
+            )
+        ).thenThrow(
+            new ApiClientException(409, "Transição de status inválida.")
+        );
+
+        RegistroRecepcaoController controller = new RegistroRecepcaoController(
+            apiClient,
+            userSession,
+            appContext,
+            DIRECT_EXECUTOR
+        );
+
+        Parent root = executarNoJavaFx(() -> {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/RegistroRecepcao.fxml")
+            );
+            loader.setControllerFactory(clazz -> controller);
+            return loader.load();
+        });
+
+        executarNoJavaFx(() -> {
+            TableView<LoteResiduoResponse> tabela =
+                (TableView<LoteResiduoResponse>) root.lookup("#tblLotesEstoque");
+            Button btnAvancarStatus = (Button) root.lookup(
+                "#btnAvancarStatus"
+            );
+            Label lblMensagem = (Label) root.lookup("#lblMensagem");
+
+            tabela.getSelectionModel().select(0);
+            controller.handleAvancarStatus();
+
+            assertTrue(
+                lblMensagem.getText().contains("Transição de status inválida.")
+            );
+            assertFalse(btnAvancarStatus.isDisable());
+            return null;
+        });
     }
 
     @Test
@@ -456,7 +693,7 @@ class RegistroRecepcaoControllerTest {
         when(apiClient.buscarPerfilEmpresa(1L)).thenReturn(
             criarEmpresa(1L, new BigDecimal("50.000"))
         );
-        when(apiClient.listarLotesEmEstoque(1L, null, null)).thenReturn(
+        when(apiClient.listarLotes(1L, null, null, null)).thenReturn(
             List.of()
         );
         when(

@@ -183,5 +183,50 @@ class LoteResiduoApiClientIntegrationTest {
         );
         assertEquals(400, erroValidacao.getStatusCode());
         assertFalse(erroValidacao.getDetails().isEmpty());
+
+        // Atualização de status no ciclo de vida (EM_ESTOQUE -> EM_PROCESSAMENTO -> DESTINADO)
+        LoteResiduoResponse lote1Processando = apiClient.atualizarStatusLote(
+            empresaCriadaId,
+            lote1.id(),
+            StatusLote.EM_PROCESSAMENTO
+        );
+        assertEquals(StatusLote.EM_PROCESSAMENTO, lote1Processando.status());
+
+        LoteResiduoResponse lote1Destinado = apiClient.atualizarStatusLote(
+            empresaCriadaId,
+            lote1.id(),
+            StatusLote.DESTINADO
+        );
+        assertEquals(StatusLote.DESTINADO, lote1Destinado.status());
+
+        // Transição inválida (EM_ESTOQUE -> DESTINADO direto) deve retornar 409
+        ApiClientException erroTransicao = assertThrows(
+            ApiClientException.class,
+            () ->
+                apiClient.atualizarStatusLote(
+                    empresaCriadaId,
+                    lote2.id(),
+                    StatusLote.DESTINADO
+                )
+        );
+        assertEquals(409, erroTransicao.getStatusCode());
+
+        // Consulta com filtro por status
+        List<LoteResiduoResponse> destinados = apiClient.listarLotes(
+            empresaCriadaId,
+            StatusLote.DESTINADO,
+            null,
+            null
+        );
+        assertEquals(1, destinados.size());
+        assertEquals(lote1.id(), destinados.get(0).id());
+
+        List<LoteResiduoResponse> todosStatus = apiClient.listarLotes(
+            empresaCriadaId,
+            null,
+            null,
+            null
+        );
+        assertEquals(2, todosStatus.size());
     }
 }

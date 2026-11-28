@@ -8,6 +8,7 @@ import com.residuos.lixoeletronico.dto.lote.LoteResiduoCreateRequest;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoResponse;
 import com.residuos.lixoeletronico.dto.usuario.UsuarioResponse;
 import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
+import com.residuos.lixoeletronico.model.enums.StatusLote;
 import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -111,6 +112,9 @@ public class RegistroRecepcaoController implements Initializable {
     private Label lblMassaEmEstoque;
 
     @FXML
+    private ComboBox<StatusLote> cbFiltroStatus;
+
+    @FXML
     private ComboBox<CategoriaMaterial> cbFiltroCategoria;
 
     @FXML
@@ -142,6 +146,15 @@ public class RegistroRecepcaoController implements Initializable {
 
     @FXML
     private TableColumn<LoteResiduoResponse, String> colUrgencia;
+
+    @FXML
+    private TableColumn<LoteResiduoResponse, String> colStatus;
+
+    @FXML
+    private Label lblLoteSelecionado;
+
+    @FXML
+    private Button btnAvancarStatus;
 
     @FXML
     private Button btnVoltarPerfil;
@@ -233,6 +246,20 @@ public class RegistroRecepcaoController implements Initializable {
     }
 
     private void configurarFiltrosEstoque() {
+        if (cbFiltroStatus != null) {
+            List<StatusLote> opcoesStatus = new ArrayList<>();
+            opcoesStatus.add(null);
+            opcoesStatus.addAll(Arrays.asList(StatusLote.values()));
+            cbFiltroStatus.setItems(
+                FXCollections.observableArrayList(opcoesStatus)
+            );
+            cbFiltroStatus.setCellFactory(listView ->
+                criarCelulaStatusFiltro()
+            );
+            cbFiltroStatus.setButtonCell(criarCelulaStatusFiltro());
+            cbFiltroStatus.setValue(null);
+        }
+
         if (cbFiltroCategoria != null) {
             List<CategoriaMaterial> opcoesCategoria = new ArrayList<>();
             opcoesCategoria.add(null);
@@ -271,6 +298,20 @@ public class RegistroRecepcaoController implements Initializable {
                     setText("Todas as categorias");
                 } else {
                     setText(formatarCategoria(item));
+                }
+            }
+        };
+    }
+
+    private ListCell<StatusLote> criarCelulaStatusFiltro() {
+        return new ListCell<>() {
+            @Override
+            protected void updateItem(StatusLote item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("Todos os status");
+                } else {
+                    setText(formatarStatus(item));
                 }
             }
         };
@@ -336,6 +377,22 @@ public class RegistroRecepcaoController implements Initializable {
                 )
             );
         }
+        if (colStatus != null) {
+            colStatus.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                    formatarStatus(cell.getValue().status())
+                )
+            );
+        }
+        if (tblLotesEstoque != null) {
+            tblLotesEstoque
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener((obs, antigo, selecionado) ->
+                    atualizarControlesStatusSelecionado(selecionado)
+                );
+        }
+        atualizarControlesStatusSelecionado(null);
     }
 
     public void carregarDadosEmpresaEEstoque() {
@@ -350,6 +407,7 @@ public class RegistroRecepcaoController implements Initializable {
         }
         atualizarResumoMassaTotal(empresa.totalKgDescartado());
 
+        StatusLote filtroStatus = obterFiltroStatus();
         CategoriaMaterial filtroCategoria = obterFiltroCategoria();
         UrgenciaDescarte filtroUrgencia = obterFiltroUrgencia();
         definirCarregando(true);
@@ -359,15 +417,16 @@ public class RegistroRecepcaoController implements Initializable {
                 EmpresaResponse empresaAtualizada = apiClient.buscarPerfilEmpresa(
                     empresa.id()
                 );
-                List<LoteResiduoResponse> lotesEmEstoque =
-                    apiClient.listarLotesEmEstoque(
+                List<LoteResiduoResponse> lotes =
+                    apiClient.listarLotes(
                         empresa.id(),
+                        filtroStatus,
                         filtroCategoria,
                         filtroUrgencia
                     );
                 return new DadosEstoqueCarregados(
                     empresaAtualizada,
-                    lotesEmEstoque
+                    lotes
                 );
             },
             asyncExecutor
@@ -392,6 +451,7 @@ public class RegistroRecepcaoController implements Initializable {
                 }
                 atualizarTabelaEEstoque(
                     resultado.lotes(),
+                    filtroStatus,
                     filtroCategoria != null || filtroUrgencia != null
                 );
             })
@@ -410,6 +470,9 @@ public class RegistroRecepcaoController implements Initializable {
 
     @FXML
     public void handleLimparFiltros() {
+        if (cbFiltroStatus != null) {
+            cbFiltroStatus.setValue(null);
+        }
         if (cbFiltroCategoria != null) {
             cbFiltroCategoria.setValue(null);
         }
@@ -426,14 +489,16 @@ public class RegistroRecepcaoController implements Initializable {
             return;
         }
 
+        StatusLote filtroStatus = obterFiltroStatus();
         CategoriaMaterial filtroCategoria = obterFiltroCategoria();
         UrgenciaDescarte filtroUrgencia = obterFiltroUrgencia();
         definirCarregando(true);
 
         CompletableFuture.supplyAsync(
             () ->
-                apiClient.listarLotesEmEstoque(
+                apiClient.listarLotes(
                     empresa.id(),
+                    filtroStatus,
                     filtroCategoria,
                     filtroUrgencia
                 ),
@@ -443,13 +508,14 @@ public class RegistroRecepcaoController implements Initializable {
                 definirCarregando(false);
                 if (erro != null) {
                     exibirErro(
-                        "Erro ao consultar lotes em estoque: " +
+                        "Erro ao consultar lotes: " +
                             extrairMensagemErro(erro)
                     );
                     return;
                 }
                 atualizarTabelaEEstoque(
                     lotes,
+                    filtroStatus,
                     filtroCategoria != null || filtroUrgencia != null
                 );
                 if (exibirMensagemSucesso) {
@@ -556,6 +622,7 @@ public class RegistroRecepcaoController implements Initializable {
             usuarioVinculadoId
         );
 
+        StatusLote filtroStatus = obterFiltroStatus();
         CategoriaMaterial filtroCategoria = obterFiltroCategoria();
         UrgenciaDescarte filtroUrgencia = obterFiltroUrgencia();
 
@@ -571,16 +638,17 @@ public class RegistroRecepcaoController implements Initializable {
                 EmpresaResponse empresaAtualizada = apiClient.buscarPerfilEmpresa(
                     empresa.id()
                 );
-                List<LoteResiduoResponse> lotesEmEstoque =
-                    apiClient.listarLotesEmEstoque(
+                List<LoteResiduoResponse> lotes =
+                    apiClient.listarLotes(
                         empresa.id(),
+                        filtroStatus,
                         filtroCategoria,
                         filtroUrgencia
                     );
                 return new ResultadoRegistroRecepcao(
                     loteRegistrado,
                     empresaAtualizada,
-                    lotesEmEstoque
+                    lotes
                 );
             },
             asyncExecutor
@@ -604,6 +672,7 @@ public class RegistroRecepcaoController implements Initializable {
 
                 atualizarTabelaEEstoque(
                     resultado.lotesEmEstoque(),
+                    filtroStatus,
                     filtroCategoria != null || filtroUrgencia != null
                 );
 
@@ -777,6 +846,88 @@ public class RegistroRecepcaoController implements Initializable {
         }
     }
 
+    @FXML
+    public void handleAvancarStatus() {
+        EmpresaResponse empresa = userSession.getEmpresaLogada();
+        if (empresa == null) {
+            exibirErro("Sessão expirada. Faça login novamente.");
+            return;
+        }
+
+        LoteResiduoResponse loteSelecionado = tblLotesEstoque != null
+            ? tblLotesEstoque.getSelectionModel().getSelectedItem()
+            : null;
+        if (loteSelecionado == null) {
+            exibirErro("Selecione um lote na tabela para atualizar o status.");
+            return;
+        }
+
+        StatusLote proximoStatus = obterProximoStatus(loteSelecionado.status());
+        if (proximoStatus == null) {
+            exibirErro(
+                "Lotes com status Destinado já concluíram o ciclo de vida."
+            );
+            return;
+        }
+
+        StatusLote filtroStatus = obterFiltroStatus();
+        CategoriaMaterial filtroCategoria = obterFiltroCategoria();
+        UrgenciaDescarte filtroUrgencia = obterFiltroUrgencia();
+
+        definirCarregando(true);
+        exibirInfo(
+            "Atualizando status do lote #" + loteSelecionado.id() + "..."
+        );
+
+        CompletableFuture.supplyAsync(
+            () -> {
+                LoteResiduoResponse loteAtualizado =
+                    apiClient.atualizarStatusLote(
+                        empresa.id(),
+                        loteSelecionado.id(),
+                        proximoStatus
+                    );
+                List<LoteResiduoResponse> lotes = apiClient.listarLotes(
+                    empresa.id(),
+                    filtroStatus,
+                    filtroCategoria,
+                    filtroUrgencia
+                );
+                return new ResultadoAtualizacaoStatus(loteAtualizado, lotes);
+            },
+            asyncExecutor
+        ).whenComplete((resultado, erro) ->
+            executarNaUiThread(() -> {
+                definirCarregando(false);
+                if (erro != null) {
+                    exibirErro(
+                        "Erro ao atualizar status do lote: " +
+                            extrairMensagemErro(erro)
+                    );
+                    return;
+                }
+
+                atualizarTabelaEEstoque(
+                    resultado.lotes(),
+                    filtroStatus,
+                    filtroCategoria != null || filtroUrgencia != null
+                );
+                selecionarLotePorId(resultado.loteAtualizado().id());
+                exibirSucesso(
+                    "Status do lote #" +
+                        resultado.loteAtualizado().id() +
+                        " atualizado para " +
+                        formatarStatus(resultado.loteAtualizado().status()) +
+                        "."
+                );
+            })
+        );
+    }
+
+    private StatusLote obterFiltroStatus() {
+        return cbFiltroStatus != null ? cbFiltroStatus.getValue() : null;
+    }
+
     private CategoriaMaterial obterFiltroCategoria() {
         return cbFiltroCategoria != null ? cbFiltroCategoria.getValue() : null;
     }
@@ -796,6 +947,16 @@ public class RegistroRecepcaoController implements Initializable {
         if (btnFiltrarEstoque != null) btnFiltrarEstoque.setDisable(carregando);
         if (btnLimparFiltros != null) btnLimparFiltros.setDisable(carregando);
         if (btnAtualizarEstoque != null) btnAtualizarEstoque.setDisable(carregando);
+        if (btnAvancarStatus != null) {
+            if (carregando) {
+                btnAvancarStatus.setDisable(true);
+            } else {
+                LoteResiduoResponse selecionado = tblLotesEstoque != null
+                    ? tblLotesEstoque.getSelectionModel().getSelectedItem()
+                    : null;
+                atualizarControlesStatusSelecionado(selecionado);
+            }
+        }
     }
 
     private void executarNaUiThread(Runnable acao) {
@@ -829,22 +990,40 @@ public class RegistroRecepcaoController implements Initializable {
 
     private void atualizarTabelaEEstoque(
         List<LoteResiduoResponse> lotes,
-        boolean filtrado
+        StatusLote filtroStatus,
+        boolean outrosFiltrosAtivos
     ) {
         List<LoteResiduoResponse> listaSegura = lotes != null ? lotes : List.of();
         if (tblLotesEstoque != null) {
             tblLotesEstoque.setItems(
                 FXCollections.observableArrayList(listaSegura)
             );
-        }
-        if (lblTituloMassaEstoque != null) {
-            lblTituloMassaEstoque.setText(
-                filtrado ? "EM ESTOQUE (FILTRADO)" : "EM ESTOQUE ATUAL"
+            atualizarControlesStatusSelecionado(
+                tblLotesEstoque.getSelectionModel().getSelectedItem()
             );
         }
+        if (lblTituloMassaEstoque != null) {
+            String tituloBase = switch (filtroStatus != null ? filtroStatus : StatusLote.EM_ESTOQUE) {
+                case EM_ESTOQUE -> "EM ESTOQUE ATUAL";
+                case EM_PROCESSAMENTO -> "EM PROCESSAMENTO";
+                case DESTINADO -> "DESTINADOS";
+            };
+            if (outrosFiltrosAtivos) {
+                tituloBase = switch (filtroStatus != null ? filtroStatus : StatusLote.EM_ESTOQUE) {
+                    case EM_ESTOQUE -> "EM ESTOQUE (FILTRADO)";
+                    case EM_PROCESSAMENTO -> "EM PROCESSAMENTO (FILTRADO)";
+                    case DESTINADO -> "DESTINADOS (FILTRADO)";
+                };
+            }
+            lblTituloMassaEstoque.setText(tituloBase);
+        }
         if (lblMassaEmEstoque != null) {
+            StatusLote statusAlvo = filtroStatus != null
+                ? filtroStatus
+                : StatusLote.EM_ESTOQUE;
             BigDecimal soma = listaSegura
                 .stream()
+                .filter(lote -> lote.status() == statusAlvo)
                 .map(LoteResiduoResponse::pesoKg)
                 .filter(p -> p != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -852,6 +1031,78 @@ public class RegistroRecepcaoController implements Initializable {
                 soma.stripTrailingZeros().toPlainString() + " kg"
             );
         }
+    }
+
+    private void selecionarLotePorId(Long loteId) {
+        if (tblLotesEstoque == null || loteId == null) {
+            return;
+        }
+        for (LoteResiduoResponse item : tblLotesEstoque.getItems()) {
+            if (loteId.equals(item.id())) {
+                tblLotesEstoque.getSelectionModel().select(item);
+                atualizarControlesStatusSelecionado(item);
+                return;
+            }
+        }
+        atualizarControlesStatusSelecionado(null);
+    }
+
+    private void atualizarControlesStatusSelecionado(
+        LoteResiduoResponse loteSelecionado
+    ) {
+        if (loteSelecionado == null) {
+            if (lblLoteSelecionado != null) {
+                lblLoteSelecionado.setText(
+                    "Selecione um lote na tabela para atualizar o status."
+                );
+            }
+            if (btnAvancarStatus != null) {
+                btnAvancarStatus.setText("Avançar Status");
+                btnAvancarStatus.setDisable(true);
+            }
+            return;
+        }
+
+        if (lblLoteSelecionado != null) {
+            String pesoTexto = loteSelecionado.pesoKg() != null
+                ? loteSelecionado.pesoKg().stripTrailingZeros().toPlainString()
+                : "0";
+            lblLoteSelecionado.setText(
+                "Lote #" +
+                    loteSelecionado.id() +
+                    " — " +
+                    loteSelecionado.tipoResiduo() +
+                    " (" +
+                    pesoTexto +
+                    " kg) • Status: " +
+                    formatarStatus(loteSelecionado.status())
+            );
+        }
+
+        if (btnAvancarStatus != null) {
+            StatusLote proximo = obterProximoStatus(loteSelecionado.status());
+            if (proximo == StatusLote.EM_PROCESSAMENTO) {
+                btnAvancarStatus.setText("Iniciar Processamento");
+                btnAvancarStatus.setDisable(false);
+            } else if (proximo == StatusLote.DESTINADO) {
+                btnAvancarStatus.setText("Marcar como Destinado");
+                btnAvancarStatus.setDisable(false);
+            } else {
+                btnAvancarStatus.setText("Lote Destinado");
+                btnAvancarStatus.setDisable(true);
+            }
+        }
+    }
+
+    static StatusLote obterProximoStatus(StatusLote statusAtual) {
+        if (statusAtual == null) {
+            return null;
+        }
+        return switch (statusAtual) {
+            case EM_ESTOQUE -> StatusLote.EM_PROCESSAMENTO;
+            case EM_PROCESSAMENTO -> StatusLote.DESTINADO;
+            case DESTINADO -> null;
+        };
     }
 
     private void exibirErro(String mensagem) {
@@ -910,6 +1161,17 @@ public class RegistroRecepcaoController implements Initializable {
         };
     }
 
+    public static String formatarStatus(StatusLote status) {
+        if (status == null) {
+            return "";
+        }
+        return switch (status) {
+            case EM_ESTOQUE -> "Em Estoque";
+            case EM_PROCESSAMENTO -> "Em Processamento";
+            case DESTINADO -> "Destinado";
+        };
+    }
+
     private record DadosEstoqueCarregados(
         EmpresaResponse empresa,
         List<LoteResiduoResponse> lotes
@@ -919,5 +1181,10 @@ public class RegistroRecepcaoController implements Initializable {
         LoteResiduoResponse loteRegistrado,
         EmpresaResponse empresaAtualizada,
         List<LoteResiduoResponse> lotesEmEstoque
+    ) {}
+
+    private record ResultadoAtualizacaoStatus(
+        LoteResiduoResponse loteAtualizado,
+        List<LoteResiduoResponse> lotes
     ) {}
 }

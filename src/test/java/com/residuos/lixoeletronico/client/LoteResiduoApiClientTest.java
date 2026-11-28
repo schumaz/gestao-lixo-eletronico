@@ -233,4 +233,112 @@ class LoteResiduoApiClientTest {
         assertEquals(1, ex.getDetails().size());
         mockServer.verify();
     }
+
+    @Test
+    @DisplayName("Deve enviar GET /api/empresas/{id}/lotes com filtro de status, categoria e urgência")
+    void deveListarLotesComFiltroDeStatus() {
+        String responseJson = """
+        [
+          {
+            "id": 15,
+            "empresaId": 1,
+            "nomeUsuario": "Mariana",
+            "contatoUsuario": "3499999",
+            "dataRecepcao": "2026-11-23",
+            "categoriaMaterial": "INFORMATICA",
+            "tipoResiduo": "Notebooks",
+            "pesoKg": 22.000,
+            "urgenciaDescarte": "ALTA",
+            "status": "EM_PROCESSAMENTO",
+            "criadoEm": "2026-11-23T10:00:00Z",
+            "atualizadoEm": "2026-11-23T12:00:00Z"
+          }
+        ]
+        """;
+
+        mockServer
+            .expect(
+                requestTo(
+                    "http://localhost:8080/api/empresas/1/lotes?status=EM_PROCESSAMENTO&categoriaMaterial=INFORMATICA&urgenciaDescarte=ALTA"
+                )
+            )
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+        List<LoteResiduoResponse> lotes = apiClient.listarLotes(
+            1L,
+            StatusLote.EM_PROCESSAMENTO,
+            CategoriaMaterial.INFORMATICA,
+            UrgenciaDescarte.ALTA
+        );
+
+        assertEquals(1, lotes.size());
+        assertEquals(15L, lotes.get(0).id());
+        assertEquals(StatusLote.EM_PROCESSAMENTO, lotes.get(0).status());
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("Deve enviar PATCH /api/empresas/{empresaId}/lotes/{loteId}/status e traduzir conflito 409")
+    void deveAtualizarStatusLoteETraduzirConflito() {
+        String responseJson = """
+        {
+          "id": 15,
+          "empresaId": 1,
+          "nomeUsuario": "Mariana",
+          "contatoUsuario": "3499999",
+          "dataRecepcao": "2026-11-23",
+          "categoriaMaterial": "INFORMATICA",
+          "tipoResiduo": "Notebooks",
+          "pesoKg": 22.000,
+          "urgenciaDescarte": "ALTA",
+          "status": "EM_PROCESSAMENTO",
+          "criadoEm": "2026-11-23T10:00:00Z",
+          "atualizadoEm": "2026-11-23T12:00:00Z"
+        }
+        """;
+
+        mockServer
+            .expect(requestTo("http://localhost:8080/api/empresas/1/lotes/15/status"))
+            .andExpect(method(HttpMethod.PATCH))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.status").value("EM_PROCESSAMENTO"))
+            .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+        LoteResiduoResponse atualizado = apiClient.atualizarStatusLote(
+            1L,
+            15L,
+            StatusLote.EM_PROCESSAMENTO
+        );
+
+        assertEquals(StatusLote.EM_PROCESSAMENTO, atualizado.status());
+        mockServer.verify();
+
+        mockServer.reset();
+        String conflictJson = """
+        {
+          "status": 409,
+          "message": "Transição de status inválida",
+          "errors": [],
+          "timestamp": "2026-11-23T12:05:00Z"
+        }
+        """;
+
+        mockServer
+            .expect(requestTo("http://localhost:8080/api/empresas/1/lotes/15/status"))
+            .andExpect(method(HttpMethod.PATCH))
+            .andRespond(
+                withStatus(HttpStatus.CONFLICT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(conflictJson)
+            );
+
+        ApiClientException ex = assertThrows(ApiClientException.class, () ->
+            apiClient.atualizarStatusLote(1L, 15L, StatusLote.EM_ESTOQUE)
+        );
+
+        assertEquals(409, ex.getStatusCode());
+        assertEquals("Transição de status inválida", ex.getMessage());
+        mockServer.verify();
+    }
 }

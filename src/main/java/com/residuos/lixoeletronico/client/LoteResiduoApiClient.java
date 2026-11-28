@@ -4,8 +4,10 @@ import com.residuos.lixoeletronico.dto.ApiErrorResponse;
 import com.residuos.lixoeletronico.dto.empresa.EmpresaResponse;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoCreateRequest;
 import com.residuos.lixoeletronico.dto.lote.LoteResiduoResponse;
+import com.residuos.lixoeletronico.dto.lote.LoteResiduoStatusUpdateRequest;
 import com.residuos.lixoeletronico.dto.usuario.UsuarioResponse;
 import com.residuos.lixoeletronico.model.enums.CategoriaMaterial;
+import com.residuos.lixoeletronico.model.enums.StatusLote;
 import com.residuos.lixoeletronico.model.enums.UrgenciaDescarte;
 import java.util.List;
 import java.util.Optional;
@@ -82,6 +84,71 @@ public class LoteResiduoApiClient {
             throw traduzirErroHttp(
                 ex,
                 "Não foi possível consultar os lotes em estoque."
+            );
+        } catch (ResourceAccessException ex) {
+            throw erroConexao(ex);
+        }
+    }
+
+    public List<LoteResiduoResponse> listarLotes(
+        Long empresaId,
+        StatusLote status,
+        CategoriaMaterial categoriaMaterial,
+        UrgenciaDescarte urgenciaDescarte
+    ) {
+        try {
+            List<LoteResiduoResponse> resposta = restClient
+                .get()
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/api/empresas/{empresaId}/lotes");
+                    if (status != null) {
+                        uriBuilder.queryParam("status", status.name());
+                    }
+                    if (categoriaMaterial != null) {
+                        uriBuilder.queryParam(
+                            "categoriaMaterial",
+                            categoriaMaterial.name()
+                        );
+                    }
+                    if (urgenciaDescarte != null) {
+                        uriBuilder.queryParam(
+                            "urgenciaDescarte",
+                            urgenciaDescarte.name()
+                        );
+                    }
+                    return uriBuilder.build(empresaId);
+                })
+                .retrieve()
+                .body(LISTA_LOTES_TYPE);
+
+            return resposta != null ? resposta : List.of();
+        } catch (RestClientResponseException ex) {
+            throw traduzirErroHttp(
+                ex,
+                "Não foi possível consultar os lotes da empresa."
+            );
+        } catch (ResourceAccessException ex) {
+            throw erroConexao(ex);
+        }
+    }
+
+    public LoteResiduoResponse atualizarStatusLote(
+        Long empresaId,
+        Long loteId,
+        StatusLote novoStatus
+    ) {
+        try {
+            return restClient
+                .patch()
+                .uri("/api/empresas/{empresaId}/lotes/{loteId}/status", empresaId, loteId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new LoteResiduoStatusUpdateRequest(novoStatus))
+                .retrieve()
+                .body(LoteResiduoResponse.class);
+        } catch (RestClientResponseException ex) {
+            throw traduzirErroHttp(
+                ex,
+                "Não foi possível atualizar o status do lote."
             );
         } catch (ResourceAccessException ex) {
             throw erroConexao(ex);

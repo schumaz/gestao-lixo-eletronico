@@ -195,7 +195,7 @@
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
                         <Label style="-fx-text-fill: #0B1B4F; -fx-font-size: 16px; -fx-font-weight: bold;"
-                               text="Lotes em Estoque (Inventário)" />
+                               text="Inventário de Lotes" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Button fx:id="btnAtualizarEstoque" mnemonicParsing="false" onAction="#handleAtualizarEstoque"
                                 style="-fx-background-color: #ECEFF1; -fx-text-fill: #0B1B4F; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 6 12 6 12;"
@@ -206,9 +206,11 @@
                   <!-- BARRA DE FILTROS DA LISTAGEM (API) -->
                   <HBox alignment="CENTER_LEFT" spacing="8.0">
                      <children>
+                        <ComboBox fx:id="cbFiltroStatus" prefWidth="135.0"
+                                  promptText="Todos os status" />
                         <ComboBox fx:id="cbFiltroCategoria" maxWidth="1.7976931348623157E308"
                                   promptText="Todas as categorias" HBox.hgrow="ALWAYS" />
-                        <ComboBox fx:id="cbFiltroUrgencia" prefWidth="145.0"
+                        <ComboBox fx:id="cbFiltroUrgencia" prefWidth="135.0"
                                   promptText="Todas as urgências" />
                         <Button fx:id="btnFiltrarEstoque" mnemonicParsing="false" onAction="#handleFiltrarEstoque"
                                 style="-fx-background-color: #0B1B4F; -fx-text-fill: #FFFFFF; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 7 12 7 12;"
@@ -221,16 +223,32 @@
 
                   <TableView fx:id="tblLotesEstoque" VBox.vgrow="ALWAYS">
                      <columns>
-                        <TableColumn fx:id="colData" prefWidth="88.0" text="Data" />
-                        <TableColumn fx:id="colMaterial" prefWidth="125.0" text="Material" />
-                        <TableColumn fx:id="colTipo" prefWidth="150.0" text="Resíduo" />
-                        <TableColumn fx:id="colPeso" prefWidth="72.0" text="Peso (kg)" />
-                        <TableColumn fx:id="colUrgencia" prefWidth="78.0" text="Urgência" />
+                        <TableColumn fx:id="colData" prefWidth="82.0" text="Data" />
+                        <TableColumn fx:id="colMaterial" prefWidth="112.0" text="Material" />
+                        <TableColumn fx:id="colTipo" prefWidth="128.0" text="Resíduo" />
+                        <TableColumn fx:id="colPeso" prefWidth="68.0" text="Peso (kg)" />
+                        <TableColumn fx:id="colUrgencia" prefWidth="72.0" text="Urgência" />
+                        <TableColumn fx:id="colStatus" prefWidth="116.0" text="Status" />
                      </columns>
                      <placeholder>
-                        <Label style="-fx-text-fill: #78909C;" text="Nenhum lote em estoque no momento." />
+                        <Label style="-fx-text-fill: #78909C;" text="Nenhum lote encontrado para os filtros selecionados." />
                      </placeholder>
                   </TableView>
+
+                  <!-- GESTÃO DE CICLO DE VIDA DO LOTE SELECIONADO -->
+                  <HBox alignment="CENTER_LEFT" spacing="10.0"
+                        style="-fx-background-color: #F4F6F8; -fx-border-color: #E0E4E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;">
+                     <children>
+                        <Label fx:id="lblLoteSelecionado" maxWidth="1.7976931348623157E308"
+                               style="-fx-text-fill: #37474F; -fx-font-size: 12px; -fx-font-weight: bold;"
+                               text="Selecione um lote na tabela para atualizar o status." wrapText="true"
+                               HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnAvancarStatus" disable="true" mnemonicParsing="false"
+                                onAction="#handleAvancarStatus"
+                                style="-fx-background-color: #1565C0; -fx-text-fill: #FFFFFF; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 7 14 7 14;"
+                                text="Avançar Status" />
+                     </children>
+                  </HBox>
                </children>
             </VBox>
          </children>
