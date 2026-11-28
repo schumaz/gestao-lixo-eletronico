@@ -1,10 +1,13 @@
 package com.residuos.lixoeletronico.controller;
 
 import com.residuos.lixoeletronico.config.UserSession;
+import com.residuos.lixoeletronico.dto.avaliacao.AvaliacaoResponse;
+import com.residuos.lixoeletronico.dto.avaliacao.ResumoAvaliacaoResponse;
 import com.residuos.lixoeletronico.dto.empresa.ContatoDTO;
 import com.residuos.lixoeletronico.dto.empresa.EmpresaResponse;
 import com.residuos.lixoeletronico.dto.empresa.EnderecoDTO;
 import com.residuos.lixoeletronico.dto.empresa.HorarioFuncionamentoDTO;
+import com.residuos.lixoeletronico.service.AvaliacaoService;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,6 +15,7 @@ import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +23,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -71,15 +77,38 @@ public class PerfilEmpresaController implements Initializable {
     @FXML
     private Label lblHorarioDomingo;
 
+    @FXML
+    private Label lblNotaMedia;
+
+    @FXML
+    private Label lblEstrelasNota;
+
+    @FXML
+    private Label lblTotalAvaliacoes;
+
+    @FXML
+    private VBox vboxComentariosAvaliacoes;
+
     private final UserSession userSession;
     private final ApplicationContext applicationContext;
+    private final AvaliacaoService avaliacaoService;
 
     public PerfilEmpresaController(
         UserSession userSession,
         ApplicationContext applicationContext
     ) {
+        this(userSession, applicationContext, null);
+    }
+
+    @Autowired
+    public PerfilEmpresaController(
+        UserSession userSession,
+        ApplicationContext applicationContext,
+        AvaliacaoService avaliacaoService
+    ) {
         this.userSession = userSession;
         this.applicationContext = applicationContext;
+        this.avaliacaoService = avaliacaoService;
     }
 
     @Override
@@ -87,6 +116,7 @@ public class PerfilEmpresaController implements Initializable {
         EmpresaResponse empresa = userSession.getEmpresaLogada();
         if (empresa != null) {
             preencherDadosPerfil(empresa);
+            carregarAvaliacoesEmpresa(empresa.id());
         }
     }
 
@@ -167,6 +197,84 @@ public class PerfilEmpresaController implements Initializable {
 
         formatarEstatisticasDescarte(empresa.totalKgDescartado());
         formatarHorarios(empresa.horarios());
+    }
+
+    public void carregarAvaliacoesEmpresa(Long empresaId) {
+        if (avaliacaoService == null || empresaId == null) {
+            preencherResumoAvaliacoes(
+                new ResumoAvaliacaoResponse(empresaId, 0.0, 0L, List.of())
+            );
+            return;
+        }
+        ResumoAvaliacaoResponse resumo = avaliacaoService.obterResumoAvaliacoes(
+            empresaId
+        );
+        preencherResumoAvaliacoes(resumo);
+    }
+
+    public void preencherResumoAvaliacoes(ResumoAvaliacaoResponse resumo) {
+        if (resumo == null || resumo.totalAvaliacoes() == 0) {
+            if (lblNotaMedia != null) lblNotaMedia.setText("Sem nota");
+            if (lblEstrelasNota != null) lblEstrelasNota.setText("☆☆☆☆☆");
+            if (lblTotalAvaliacoes != null) lblTotalAvaliacoes.setText(
+                "(0 avaliações)"
+            );
+            if (vboxComentariosAvaliacoes != null) {
+                vboxComentariosAvaliacoes.getChildren().clear();
+                Label vazio = new Label(
+                    "Ainda não há avaliações registradas para este centro de coleta."
+                );
+                vazio.setStyle("-fx-text-fill: #64748B; -fx-font-size: 12px;");
+                vazio.setWrapText(true);
+                vboxComentariosAvaliacoes.getChildren().add(vazio);
+            }
+            return;
+        }
+
+        double media = resumo.mediaNota() != null ? resumo.mediaNota() : 0.0;
+        if (lblNotaMedia != null) {
+            lblNotaMedia.setText(String.format(Locale.US, "%.1f / 5.0", media));
+        }
+        if (lblEstrelasNota != null) {
+            lblEstrelasNota.setText(gerarEstrelas((int) Math.round(media)));
+        }
+        if (lblTotalAvaliacoes != null) {
+            String sufixo =
+                resumo.totalAvaliacoes() == 1 ? "avaliação" : "avaliações";
+            lblTotalAvaliacoes.setText(
+                "(" + resumo.totalAvaliacoes() + " " + sufixo + ")"
+            );
+        }
+
+        if (vboxComentariosAvaliacoes != null) {
+            vboxComentariosAvaliacoes.getChildren().clear();
+            List<AvaliacaoResponse> recentes =
+                resumo.avaliacoes() != null
+                    ? resumo.avaliacoes().stream().limit(2).toList()
+                    : List.of();
+
+            for (AvaliacaoResponse av : recentes) {
+                String textoComentario =
+                    av.comentario() != null && !av.comentario().isBlank()
+                        ? "“" + av.comentario() + "”"
+                        : "Avaliação sem comentário.";
+                Label item = new Label(
+                    gerarEstrelas(av.nota()) +
+                        "  " +
+                        av.nomeUsuario() +
+                        ": " +
+                        textoComentario
+                );
+                item.setStyle("-fx-text-fill: #475569; -fx-font-size: 12px;");
+                item.setWrapText(true);
+                vboxComentariosAvaliacoes.getChildren().add(item);
+            }
+        }
+    }
+
+    static String gerarEstrelas(int nota) {
+        int estrelasCheias = Math.max(0, Math.min(5, nota));
+        return "★".repeat(estrelasCheias) + "☆".repeat(5 - estrelasCheias);
     }
 
     private void formatarEstatisticasDescarte(BigDecimal totalKg) {

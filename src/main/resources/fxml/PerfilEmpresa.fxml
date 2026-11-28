@@ -64,13 +64,53 @@
                   <!-- Espaço de Imagem na Parte Superior Esquerda -->
                   <ImageView
                             fx:id="imgDestaqueEsquerda"
-                            fitHeight="160.0"
+                            fitHeight="140.0"
                             fitWidth="430.0"
                             pickOnBounds="true"
                             preserveRatio="true"
                         />
 
-                  <Region prefHeight="10.0" />
+                  <!-- ÁREA DE NOTA DO CENTRO DE COLETA -->
+                  <VBox
+                            fx:id="boxAvaliacaoCentro"
+                            spacing="8.0"
+                            style="-fx-background-color: #F8FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 14;"
+                        >
+                     <children>
+                        <Label
+                                    style="-fx-text-fill: #2E7D32; -fx-font-weight: bold; -fx-font-size: 11px;"
+                                    text="AVALIAÇÃO DO CENTRO DE COLETA"
+                                />
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label
+                                            fx:id="lblNotaMedia"
+                                            style="-fx-text-fill: #0B1B4F; -fx-font-size: 24px; -fx-font-weight: bold;"
+                                            text="0.0 / 5.0"
+                                        />
+                              <Label
+                                            fx:id="lblEstrelasNota"
+                                            style="-fx-text-fill: #F59E0B; -fx-font-size: 18px; -fx-font-weight: bold;"
+                                            text="☆☆☆☆☆"
+                                        />
+                              <Label
+                                            fx:id="lblTotalAvaliacoes"
+                                            style="-fx-text-fill: #64748B; -fx-font-size: 12px; -fx-font-weight: bold;"
+                                            text="(0 avaliações)"
+                                        />
+                           </children>
+                        </HBox>
+                        <VBox fx:id="vboxComentariosAvaliacoes" spacing="4.0">
+                           <children>
+                              <Label
+                                            style="-fx-text-fill: #64748B; -fx-font-size: 12px;"
+                                            text="Ainda não há avaliações registradas para este centro de coleta."
+                                            wrapText="true"
+                                        />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
 
                   <!-- SEÇÃO SOBRE NÓS (Posicionada mais abaixo) -->
                   <Label
